@@ -12,10 +12,4 @@
     <ProjectReference Include="..\Hdbs.Transfer\Hdbs.Transfer.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Handlers\" />
-    <Folder Include="Implementations\" />
-    <Folder Include="Interfaces\" />
-  </ItemGroup>
-
 </Project>

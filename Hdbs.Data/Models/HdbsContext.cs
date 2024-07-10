@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,6 +24,19 @@ namespace Hdbs.Data.Models
             modelBuilder.Entity<Employee>().HasMany(e => e.Reservations).WithOne(r => r.Employee).OnDelete(DeleteBehavior.Restrict);
 
             base.OnModelCreating(modelBuilder);
+        }
+        public async Task SaveOrHandleExceptionAsync()
+        {
+            try
+            {
+                await SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                Log.Logger.Error(ex.Message);
+                Log.Logger.Error(ex.StackTrace);
+                throw;
+            }
         }
     }
 }

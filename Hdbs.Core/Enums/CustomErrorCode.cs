@@ -10,5 +10,7 @@ namespace Hdbs.Core.Enums
     {
         UnexpectedError = 400,
         LocationNotFound = 401,
+        LocationContainsDesks = 402,
+
     }
 }
