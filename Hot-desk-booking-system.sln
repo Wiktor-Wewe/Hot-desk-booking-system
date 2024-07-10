@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34616.47
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hdbs.Web", "Hot-desk-booking-system\Hdbs.Web.csproj", "{99198E1B-EBD7-41B1-BDC0-1DDDA925D25B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hdbs.Core", "Hdbs.Core\Hdbs.Core.csproj", "{F776D656-8265-4534-9F80-E76E6CE1D02F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hdbs.Data", "Hdbs.Data\Hdbs.Data.csproj", "{2481A530-90F8-4A63-947D-8384BA84C75F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hdbs.Repositories", "Hdbs.Repositories\Hdbs.Repositories.csproj", "{D4CAA9F6-DAC8-47C6-9937-9B6E75A59B69}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hdbs.Services", "Hdbs.Services\Hdbs.Services.csproj", "{AB81FB32-5027-433C-B0DB-C15C0904CB05}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hdbs.Transfer", "Hdbs.Transfer\Hdbs.Transfer.csproj", "{93E0359C-9114-415B-BBBB-96945AD15EDE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{99198E1B-EBD7-41B1-BDC0-1DDDA925D25B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99198E1B-EBD7-41B1-BDC0-1DDDA925D25B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99198E1B-EBD7-41B1-BDC0-1DDDA925D25B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99198E1B-EBD7-41B1-BDC0-1DDDA925D25B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F776D656-8265-4534-9F80-E76E6CE1D02F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F776D656-8265-4534-9F80-E76E6CE1D02F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F776D656-8265-4534-9F80-E76E6CE1D02F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F776D656-8265-4534-9F80-E76E6CE1D02F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2481A530-90F8-4A63-947D-8384BA84C75F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2481A530-90F8-4A63-947D-8384BA84C75F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2481A530-90F8-4A63-947D-8384BA84C75F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2481A530-90F8-4A63-947D-8384BA84C75F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4CAA9F6-DAC8-47C6-9937-9B6E75A59B69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4CAA9F6-DAC8-47C6-9937-9B6E75A59B69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4CAA9F6-DAC8-47C6-9937-9B6E75A59B69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4CAA9F6-DAC8-47C6-9937-9B6E75A59B69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB81FB32-5027-433C-B0DB-C15C0904CB05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB81FB32-5027-433C-B0DB-C15C0904CB05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB81FB32-5027-433C-B0DB-C15C0904CB05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB81FB32-5027-433C-B0DB-C15C0904CB05}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93E0359C-9114-415B-BBBB-96945AD15EDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93E0359C-9114-415B-BBBB-96945AD15EDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93E0359C-9114-415B-BBBB-96945AD15EDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93E0359C-9114-415B-BBBB-96945AD15EDE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BADB94C7-2F92-4171-99F0-2DBD6F55D50E}
+	EndGlobalSection
+EndGlobal
