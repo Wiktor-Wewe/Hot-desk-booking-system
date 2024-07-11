@@ -30,6 +30,7 @@ namespace Hdbs.Services.Implementations
             var desk = new Desk
             {
                 Name = command.Name,
+                Description = command.Description,
                 LocationId = command.LocationId,
                 Location = location
             };
@@ -51,6 +52,7 @@ namespace Hdbs.Services.Implementations
             {
                 Id = deskFromDb.Id,
                 Name = deskFromDb.Name,
+                Description = deskFromDb.Description,
                 LocationId = deskFromDb.LocationId,
                 Location = deskFromDb.Location,
                 IsAvailable = deskFromDb.Reservations?.FirstOrDefault(r => r.IsValid()) == null ? true : false,
@@ -88,6 +90,7 @@ namespace Hdbs.Services.Implementations
             }
 
             desk.Name = command.Name == null ? desk.Name : command.Name;
+            desk.Description = command.Description == null ? desk.Description : command.Description;
             desk.LocationId = command.LocationId == null ? desk.LocationId : command.LocationId.Value;
 
             await _dbContext.SaveOrHandleExceptionAsync();

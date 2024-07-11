@@ -1,18 +1,13 @@
 ﻿using Hdbs.Core.CustomExceptions;
 using Hdbs.Core.Enums;
+using Hdbs.Core.Utils;
 using Hdbs.Data.Models;
 using Hdbs.Repositories.Interfaces;
 using Hdbs.Transfer.Desks.Data;
 using Hdbs.Transfer.Desks.Queries;
-using Hdbs.Transfer.Locations.Data;
 using Hdbs.Transfer.Shared.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Linq.Dynamic.Core;
 
 namespace Hdbs.Repositories.Implementations
 {
@@ -30,6 +25,7 @@ namespace Hdbs.Repositories.Implementations
             var desk = await _dbContext.Desks
                 .Include(d => d.Location)
                 .Include(d => d.Reservations)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == query.Id);
 
             if (desk == null)
@@ -41,6 +37,7 @@ namespace Hdbs.Repositories.Implementations
             {
                 Id = desk.Id,
                 Name = desk.Name,
+                Description = desk.Description,
                 LocationId = desk.LocationId,
                 Location = desk.Location,
                 IsAvailable = desk.Reservations?.FirstOrDefault(r => r.IsValid()) == null ? true : false,
@@ -56,10 +53,34 @@ namespace Hdbs.Repositories.Implementations
                 .AsNoTracking()
                 .OrderBy(d => d.Id);
 
+            if (!string.IsNullOrEmpty(listAsyncQuery.SearchFor) && !string.IsNullOrEmpty(listAsyncQuery.SearchBy))
+            {
+                if (Utils.IsValidProperty<Desk>(listAsyncQuery.SearchBy) == false)
+                {
+                    throw new CustomException(CustomErrorCode.InvalidSearchBy, $"Unable to search by: {listAsyncQuery.SearchBy}");
+                }
+
+                listAsyncQuery.SearchFor = listAsyncQuery.SearchFor.Replace("'", "''");
+                query = (IOrderedQueryable<Desk>)query.Where($"{listAsyncQuery.SearchBy}.Contains(@0)", listAsyncQuery.SearchFor);
+            }
+
+            if (!string.IsNullOrEmpty(listAsyncQuery.OrderBy))
+            {
+                if(Utils.IsValidProperty<Desk>(listAsyncQuery.OrderBy) == false)
+                {
+                    throw new CustomException(CustomErrorCode.InvalidOrderBy, $"Unable to order by: {listAsyncQuery.OrderBy}");
+                }
+
+                query = listAsyncQuery.Ascending
+                    ? query.OrderBy(listAsyncQuery.OrderBy)
+                    : query.OrderBy($"{listAsyncQuery.OrderBy} descending");
+            }
+
             var desks = await PaginatedList<DeskListDto>.CreateAsync(query.Select(d => new DeskListDto
             {
                 Id = d.Id,
                 Name = d.Name,
+                Description = d.Description,
                 LocationId = d.LocationId,
                 Location = d.Location,
                 IsAvailable = false,

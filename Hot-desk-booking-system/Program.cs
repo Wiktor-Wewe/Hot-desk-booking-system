@@ -17,7 +17,7 @@ builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ExceptionFilter>();
 }).AddJsonOptions(options =>
-    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles
 );
 
 // Set Database

@@ -21,7 +21,11 @@ namespace Hdbs.Services.Implementations
         {
             var location = new Location
             {
-                Name = command.Name
+                Name = command.Name,
+                Description = command.Description,
+                Address = command.Address,
+                City = command.City,
+                Country = command.Country
             };
 
             await _dbContext.Locations.AddAsync(location);
@@ -39,6 +43,10 @@ namespace Hdbs.Services.Implementations
             {
                 Id = locationFromDb.Id,
                 Name = locationFromDb.Name,
+                Description = locationFromDb.Description,
+                Address = locationFromDb.Address,
+                City = locationFromDb.City,
+                Country = locationFromDb.Country,
                 Desks = locationFromDb.Desks,
             };
         }
@@ -53,7 +61,11 @@ namespace Hdbs.Services.Implementations
                 throw new CustomException(CustomErrorCode.LocationNotFound, $"Unable to find location with id: {command.Id}");
             }
 
-            location.Name = command.Name;
+            location.Name = command.Name == null ? location.Name : command.Name;
+            location.Description = command.Description == null ? location.Description : command.Description;
+            location.Address = command.Address == null ? location.Address : command.Address;
+            location.City = command.City == null ? location.City : command.City;
+            location.Country = command.Country == null ? location.Country : command.Country;
 
             await _dbContext.SaveOrHandleExceptionAsync();
         }

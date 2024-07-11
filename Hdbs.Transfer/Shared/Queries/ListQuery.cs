@@ -12,5 +12,7 @@ namespace Hdbs.Transfer.Shared.Queries
         public int PageSize { get; set; } = 10;
         public string? SearchBy { get; set; }
         public string? SearchFor { get; set; }
+        public string? OrderBy { get; set; }
+        public bool Ascending {  get; set; } = true;
     }
 }

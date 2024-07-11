@@ -15,6 +15,7 @@ namespace Hdbs.Data.Models
 
         [Required]
         public string Name { get; set; } = null!;
+        public string? Description { get; set; }
 
         [ForeignKey("Location")]
         public Guid LocationId { get; set; }

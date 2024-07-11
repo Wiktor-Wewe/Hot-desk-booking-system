@@ -14,5 +14,7 @@ namespace Hdbs.Core.Enums
         DeskNotFound = 403,
         DeskIsUnavailable = 404,
         EmployeeNotFound = 405,
+        InvalidSearchBy = 406,
+        InvalidOrderBy = 407,
     }
 }

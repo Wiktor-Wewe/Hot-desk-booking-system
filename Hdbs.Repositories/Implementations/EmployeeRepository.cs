@@ -1,18 +1,13 @@
 ﻿using Hdbs.Core.CustomExceptions;
 using Hdbs.Core.Enums;
+using Hdbs.Core.Utils;
 using Hdbs.Data.Models;
 using Hdbs.Repositories.Interfaces;
-using Hdbs.Transfer.Desks.Data;
 using Hdbs.Transfer.Employees.Data;
 using Hdbs.Transfer.Employees.Queries;
-using Hdbs.Transfer.Locations.Data;
 using Hdbs.Transfer.Shared.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Linq.Dynamic.Core;
 
 namespace Hdbs.Repositories.Implementations
 {
@@ -29,6 +24,7 @@ namespace Hdbs.Repositories.Implementations
         {
             var employee = await _dbContext.Employees
                 .Include(d => d.Reservations)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == query.Id);
 
             if (employee == null)
@@ -50,6 +46,29 @@ namespace Hdbs.Repositories.Implementations
                 .Include(e => e.Reservations)
                 .AsNoTracking()
                 .OrderBy(e => e.Id);
+
+            if (!string.IsNullOrEmpty(listAsyncQuery.SearchFor) && !string.IsNullOrEmpty(listAsyncQuery.SearchBy))
+            {
+                if (Utils.IsValidProperty<Employee>(listAsyncQuery.SearchBy) == false)
+                {
+                    throw new CustomException(CustomErrorCode.InvalidSearchBy, $"Unable to search by: {listAsyncQuery.SearchBy}");
+                }
+
+                listAsyncQuery.SearchFor = listAsyncQuery.SearchFor.Replace("'", "''");
+                query = (IOrderedQueryable<Employee>)query.Where($"{listAsyncQuery.SearchBy}.Contains(@0)", listAsyncQuery.SearchFor);
+            }
+
+            if (!string.IsNullOrEmpty(listAsyncQuery.OrderBy))
+            {
+                if (Utils.IsValidProperty<Employee>(listAsyncQuery.OrderBy) == false)
+                {
+                    throw new CustomException(CustomErrorCode.InvalidOrderBy, $"Unable to order by: {listAsyncQuery.OrderBy}");
+                }
+
+                query = listAsyncQuery.Ascending
+                    ? query.OrderBy(listAsyncQuery.OrderBy)
+                    : query.OrderBy($"{listAsyncQuery.OrderBy} descending");
+            }
 
             return await PaginatedList<EmployeeListDto>.CreateAsync(query.Select(e => new EmployeeListDto
             {
