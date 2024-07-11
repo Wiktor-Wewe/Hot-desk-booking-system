@@ -5,12 +5,6 @@ using Hdbs.Services.Interfaces;
 using Hdbs.Transfer.Locations.Commands;
 using Hdbs.Transfer.Locations.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Hdbs.Services.Implementations
 {
@@ -27,8 +21,7 @@ namespace Hdbs.Services.Implementations
         {
             var location = new Location
             {
-                Name = command.Name,
-                Desks = command.Desks,
+                Name = command.Name
             };
 
             await _dbContext.Locations.AddAsync(location);
@@ -45,8 +38,8 @@ namespace Hdbs.Services.Implementations
             return new LocationDto
             {
                 Id = locationFromDb.Id,
-                Name = location.Name,
-                Desks = location.Desks,
+                Name = locationFromDb.Name,
+                Desks = locationFromDb.Desks,
             };
         }
 

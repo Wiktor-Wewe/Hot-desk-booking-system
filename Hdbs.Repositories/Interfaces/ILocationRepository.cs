@@ -11,7 +11,7 @@ namespace Hdbs.Repositories.Interfaces
 {
     public interface ILocationRepository
     {
-        Task<PaginatedList<LocationListDto>> ListAsync(ListLocationsQuery listyAsyncQuery);
+        Task<PaginatedList<LocationListDto>> ListAsync(ListLocationsQuery listAsyncQuery);
         Task<LocationDto> GetAsync(GetLocationQuery query);
     }
 }

@@ -10,8 +10,7 @@ namespace Hdbs.Transfer.Locations.Data
     public class LocationListDto
     {
         public Guid Id { get; set; }
-        public string? Name { get; set; }
-        public ICollection<Desk> Desks { get; set; } = [];
-
+        public string Name { get; set; } = null!;
+        public ICollection<Desk>? Desks { get; set; }
     }
 }

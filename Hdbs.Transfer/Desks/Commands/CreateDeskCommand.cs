@@ -1,5 +1,5 @@
 ﻿using Hdbs.Data.Models;
-using Hdbs.Transfer.Locations.Data;
+using Hdbs.Transfer.Desks.Data;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -7,10 +7,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Hdbs.Transfer.Locations.Commands
+namespace Hdbs.Transfer.Desks.Commands
 {
-    public class CreateLocationCommand : IRequest<LocationDto>
+    public class CreateDeskCommand : IRequest<DeskDto>
     {
         public string Name { get; set; } = null!;
+        public Guid LocationId { get; set; }
     }
 }

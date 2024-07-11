@@ -28,9 +28,6 @@ namespace Hdbs.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("IsAvailable")
-                        .HasColumnType("bit");
-
                     b.Property<Guid>("LocationId")
                         .HasColumnType("uniqueidentifier");
 

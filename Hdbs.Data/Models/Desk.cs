@@ -20,7 +20,6 @@ namespace Hdbs.Data.Models
         public Guid LocationId { get; set; }
         public Location Location { get; set; } = null!;
 
-        public bool IsAvailable { get; set; }
 
         public ICollection<Reservation> Reservations { get; set; } = [];
     }

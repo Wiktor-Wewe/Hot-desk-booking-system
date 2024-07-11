@@ -11,6 +11,8 @@ namespace Hdbs.Core.Enums
         UnexpectedError = 400,
         LocationNotFound = 401,
         LocationContainsDesks = 402,
-
+        DeskNotFound = 403,
+        DeskIsUnavailable = 404,
+        EmployeeNotFound = 405,
     }
 }

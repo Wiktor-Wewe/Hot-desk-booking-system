@@ -1,5 +1,4 @@
-﻿using Hdbs.Data.Models;
-using Hdbs.Transfer.Locations.Data;
+﻿using Hdbs.Transfer.Employees.Data;
 using MediatR;
 using System;
 using System.Collections.Generic;
@@ -7,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Hdbs.Transfer.Locations.Commands
+namespace Hdbs.Transfer.Employees.Commands
 {
-    public class CreateLocationCommand : IRequest<LocationDto>
+    public class CreateEmployeeCommand : IRequest<EmployeeDto>
     {
         public string Name { get; set; } = null!;
     }

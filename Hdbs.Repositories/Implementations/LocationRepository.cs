@@ -23,21 +23,21 @@ namespace Hdbs.Repositories.Implementations
             _dbContext = dbContext;
         }
 
-        public async Task<PaginatedList<LocationListDto>> ListAsync(ListLocationsQuery listyAsyncQuery)
+        public async Task<PaginatedList<LocationListDto>> ListAsync(ListLocationsQuery listAsyncQuery)
         {
             var query = _dbContext.Locations
                 .AsNoTracking()
-                .OrderBy(p => p.Id);
+                .OrderBy(l => l.Id);
 
-            return await PaginatedList<LocationListDto>.CreateAsync(query.Select(p => new LocationListDto
+            return await PaginatedList<LocationListDto>.CreateAsync(query.Select(l => new LocationListDto
             {
-                Id = p.Id,
-                Name = p.Name,
-                Desks = p.Desks
+                Id = l.Id,
+                Name = l.Name,
+                Desks = l.Desks
             }).AsQueryable()
                 .AsNoTracking(),
-                listyAsyncQuery.PageIndex,
-                listyAsyncQuery.PageSize
+                listAsyncQuery.PageIndex,
+                listAsyncQuery.PageSize
             );
         }
 
