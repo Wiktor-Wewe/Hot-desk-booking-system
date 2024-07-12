@@ -11,6 +11,7 @@ namespace Hdbs.Services.Interfaces
     public interface IEmployeeService
     {
         Task<string> LoginEmployeeAsync(LoginEmployeeCommand command);
+        Task SetPermissionsAsync(SetPermissionsForEmployeeCommand command);
         Task<EmployeeDto> CreateAsync(CreateEmployeeCommand command);
         Task UpdateAsync(UpdateEmployeeCommand command);
         Task DeleteAsync(DeleteEmployeeCommand command);

@@ -24,6 +24,14 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
+        [HttpPost("{id}/permissions")]
+        public async Task<IActionResult> SetPermissionsAsync([FromRoute] string id, [FromBody] SetPermissionsForEmployeeCommand command)
+        {
+            command.Id = id;
+            await _mediator.Send(command);
+            return Ok();
+        }
+
         [HttpGet]
         public async Task<IActionResult> ListEmployeeAsync([FromQuery] ListEmployeesQuery query)
         {

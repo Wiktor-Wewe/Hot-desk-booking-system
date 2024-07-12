@@ -38,7 +38,7 @@ namespace Hdbs.Repositories.Implementations
                 Name = employee.UserName == null ? "" : employee.UserName,
                 Surname = employee.Surname,
                 Email = employee.Email == null ? "" : employee.Email,
-                Permissions = employee.Permissions,
+                Permissions = employee.Permissions.ToString(),
                 Reservations = employee.Reservations
             };
         }
@@ -79,7 +79,7 @@ namespace Hdbs.Repositories.Implementations
                 Name = e.UserName == null ? "" : e.UserName,
                 Surname = e.Surname,
                 Email = e.Email == null ? "" : e.Email,
-                Permissions = e.Permissions,
+                Permissions = e.Permissions.ToString(),
                 Reservations = e.Reservations
             }).AsQueryable()
                 .AsNoTracking(),

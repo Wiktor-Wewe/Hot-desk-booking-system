@@ -22,6 +22,7 @@ namespace Hdbs.Core.Enums
         UnableToUpdatePassword = 411,
         UnableToUpdateEmployee = 412,
         WrongPassword = 413,
-        NoJwtSecretKey = 414
+        NoJwtSecretKey = 414,
+        PermissionError = 415,
     }
 }

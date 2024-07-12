@@ -62,7 +62,7 @@ namespace Hdbs.Services.Implementations
                 Name = employeeFromDb.UserName == null ? "" : employeeFromDb.UserName,
                 Surname = employeeFromDb.Surname,
                 Email = employeeFromDb.Email == null ? "" : employeeFromDb.Email,
-                Permissions = employeeFromDb.Permissions,
+                Permissions = employeeFromDb.Permissions.ToString(),
                 Reservations = employeeFromDb.Reservations
             };
         }
@@ -126,6 +126,49 @@ namespace Hdbs.Services.Implementations
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public async Task SetPermissionsAsync(SetPermissionsForEmployeeCommand command)
+        {
+            if(command.Id == null)
+            {
+                throw new CustomException(CustomErrorCode.EmployeeNotFound, "Unable to find employee with id: null");
+            }
+
+            var employee = await _userManager.FindByIdAsync(command.Id);
+
+            if (employee == null)
+            {
+                throw new CustomException(CustomErrorCode.EmployeeNotFound, $"Unable to find employee with id: {command.Id}");
+            }
+
+            UserPermissions userPermissions = new UserPermissions();
+            
+            if (command.None) userPermissions |= UserPermissions.None;
+            if (command.SimpleView) userPermissions |= UserPermissions.SimpleView;
+            if (command.AdminView) userPermissions |= UserPermissions.AdminView;
+
+            if (command.CreateEmployee) userPermissions |= UserPermissions.CreateEmployee;
+            if (command.UpdateEmployee) userPermissions |= UserPermissions.UpdateEmployee;
+            if (command.DeleteEmployee) userPermissions |= UserPermissions.DeleteEmployee;
+            
+            if(command.CreateLocation) userPermissions |= UserPermissions.CreateLocation;
+            if(command.UpdateLocation) userPermissions |= UserPermissions.UpdateLocation;
+            if(command.DeleteLocation) userPermissions |= UserPermissions.DeleteLocation;
+
+            if(command.CreateDesk) userPermissions |= UserPermissions.CreateDesk;
+            if(command.UpdateDesk) userPermissions |= UserPermissions.UpdateDesk;
+            if(command.DeleteDesk) userPermissions |= UserPermissions.DeleteDesk;
+
+            if(command.SetPermissions) userPermissions |= UserPermissions.SetPermissions;
+
+            employee.Permissions = userPermissions;
+            
+            var result = await _userManager.UpdateAsync(employee);
+            if (result.Succeeded == false)
+            {
+                throw new CustomException(CustomErrorCode.PermissionError, $"Unable to set permission: {userPermissions} for employee with id: {command.Id}");
+            }
         }
 
         public async Task UpdateAsync(UpdateEmployeeCommand command)

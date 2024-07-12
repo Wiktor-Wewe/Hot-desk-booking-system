@@ -21,6 +21,8 @@ namespace Hdbs.Data.Models
         CreateDesk = 1 << 8,
         UpdateDesk = 1 << 9,
         DeleteDesk = 1 << 10,
+
+        SetPermissions = 1 << 11,
     }
 
     public class Employee : IdentityUser
