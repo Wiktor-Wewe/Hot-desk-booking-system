@@ -28,6 +28,7 @@ namespace Hdbs.Repositories.Implementations
         public async Task<PaginatedList<LocationListDto>> ListAsync(ListLocationsQuery listAsyncQuery)
         {
             var query = _dbContext.Locations
+                .Include(l => l.Desks)
                 .AsNoTracking()
                 .OrderBy(l => l.Id);
 
@@ -73,8 +74,9 @@ namespace Hdbs.Repositories.Implementations
         public async Task<LocationDto> GetAsync(GetLocationQuery query)
         {
             var location = await _dbContext.Locations
+                .Include(l => l.Desks)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.Id == query.Id);
+                .FirstOrDefaultAsync(l => l.Id == query.Id);
 
             if (location == null)
             {

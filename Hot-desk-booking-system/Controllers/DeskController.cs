@@ -2,12 +2,14 @@
 using Hdbs.Transfer.Desks.Commands;
 using Hdbs.Transfer.Desks.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Hot_desk_booking_system.Controllers
 {
     [Route("api/Desk")]
     [ApiController]
+    [Authorize]
     public class DeskController : Controller
     {
         private readonly IMediator _mediator;
@@ -17,6 +19,7 @@ namespace Hot_desk_booking_system.Controllers
             _mediator = mediator;
         }
 
+        [Authorize(Policy = "SimpleView")]
         [HttpGet]
         public async Task<IActionResult> ListDesksAsync([FromQuery] ListDesksQuery query)
         {

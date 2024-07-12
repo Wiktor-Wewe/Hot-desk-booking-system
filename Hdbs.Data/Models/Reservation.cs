@@ -18,7 +18,7 @@ namespace Hdbs.Data.Models
         public Desk Desk { get; set; } = null!;
 
         [ForeignKey("Employee")]
-        public Guid EmployeeId { get; set; }
+        public string EmployeeId { get; set; } = null!;
         public Employee Employee { get; set; } = null!;
 
         [Required]

@@ -1,16 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hdbs.Data.Models
 {
-    public class HdbsContext : DbContext
+
+    public class HdbsContext : IdentityDbContext<Employee>
     {
-        public HdbsContext(DbContextOptions<HdbsContext> options) : base(options) { }
+        public HdbsContext(DbContextOptions<HdbsContext> options)
+        : base(options) { }
 
         public DbSet<Location> Locations { get; set; }
         public DbSet<Desk> Desks { get; set; }

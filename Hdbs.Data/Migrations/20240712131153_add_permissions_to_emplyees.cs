@@ -5,24 +5,25 @@
 namespace Hdbs.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class add_description_to_desk : Migration
+    public partial class add_permissions_to_emplyees : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "Description",
-                table: "Desks",
-                type: "nvarchar(max)",
-                nullable: true);
+            migrationBuilder.AddColumn<int>(
+                name: "Permissions",
+                table: "AspNetUsers",
+                type: "int",
+                nullable: false,
+                defaultValue: 0);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Description",
-                table: "Desks");
+                name: "Permissions",
+                table: "AspNetUsers");
         }
     }
 }

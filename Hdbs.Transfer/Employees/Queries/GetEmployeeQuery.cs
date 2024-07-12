@@ -10,6 +10,6 @@ namespace Hdbs.Transfer.Employees.Queries
 {
     public class GetEmployeeQuery : IRequest<EmployeeDto>
     {
-        public Guid Id { get; set; }
+        public string Id { get; set; } = null!;
     }
 }

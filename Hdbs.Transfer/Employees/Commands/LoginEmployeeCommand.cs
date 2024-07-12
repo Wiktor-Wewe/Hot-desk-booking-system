@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 
 namespace Hdbs.Transfer.Employees.Commands
 {
-    public class DeleteEmployeeCommand : IRequest
+    public class LoginEmployeeCommand : IRequest<string>
     {
-        public string Id { get; set; } = null!;
+        public string Email { get; set; } = null!;
+        public string Password { get; set; } = null!;
     }
 }

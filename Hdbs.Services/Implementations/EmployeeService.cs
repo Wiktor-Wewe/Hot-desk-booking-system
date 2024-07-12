@@ -4,38 +4,52 @@ using Hdbs.Data.Models;
 using Hdbs.Services.Interfaces;
 using Hdbs.Transfer.Employees.Commands;
 using Hdbs.Transfer.Employees.Data;
-using Hdbs.Transfer.Locations.Data;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Internal;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Hdbs.Services.Implementations
 {
     public class EmployeeService : IEmployeeService
     {
-        private readonly HdbsContext _dbContext;
+        private readonly UserManager<Employee> _userManager;
+        private readonly IConfiguration _configuration;
 
-        public EmployeeService(HdbsContext dbContext)
+        public EmployeeService(UserManager<Employee> userManager, IConfiguration configuration)
         {
-            _dbContext = dbContext;
+            _userManager = userManager;
+            _configuration = configuration;
         }
 
         public async Task<EmployeeDto> CreateAsync(CreateEmployeeCommand command)
         {
+            if(command.Password != command.RePassword)
+            {
+                throw new CustomException(CustomErrorCode.PasswordsNotMatch, "Unable to create employee - passwords not match");
+            }
+
             var employee = new Employee
             {
-                Name = command.Name
+                UserName = command.Name,
+                Surname = command.Surname,
+                Email = command.Email,
+                Permissions = UserPermissions.SimpleView
             };
 
-            await _dbContext.Employees.AddAsync(employee);
-            await _dbContext.SaveOrHandleExceptionAsync();
+            var result = await _userManager.CreateAsync(employee, command.Password);
 
-            var employeeFromDb = await _dbContext.Employees
-                .Include(e => e.Reservations)
-                .FirstOrDefaultAsync(p => p.Id == employee.Id);
+            if(result.Succeeded == false)
+            {
+                throw new CustomException(CustomErrorCode.UnableToCreateEmployee, $"Unable to create employee: {result.Errors}");
+            }
+
+            var employeeFromDb = await _userManager.FindByIdAsync(employee.Id);
 
             if (employeeFromDb == null)
             {
@@ -45,39 +59,113 @@ namespace Hdbs.Services.Implementations
             return new EmployeeDto
             {
                 Id = employeeFromDb.Id,
-                Name = employeeFromDb.Name,
+                Name = employeeFromDb.UserName == null ? "" : employeeFromDb.UserName,
+                Surname = employeeFromDb.Surname,
+                Email = employeeFromDb.Email == null ? "" : employeeFromDb.Email,
+                Permissions = employeeFromDb.Permissions,
                 Reservations = employeeFromDb.Reservations
             };
         }
 
         public async Task DeleteAsync(DeleteEmployeeCommand command)
         {
-            var employee = await _dbContext.Employees
-                .FirstOrDefaultAsync(p => p.Id == command.Id);
+            var employee = await _userManager.FindByIdAsync(command.Id);
 
             if (employee == null)
             {
                 throw new CustomException(CustomErrorCode.EmployeeNotFound, $"Unable to find employee with id: {command.Id}");
             }
 
+            var result = await _userManager.DeleteAsync(employee);
 
-            _dbContext.Employees.Remove(employee);
-            await _dbContext.SaveOrHandleExceptionAsync();
+            if(result.Succeeded == false)
+            {
+                throw new CustomException(CustomErrorCode.UnableToDeleteEmployee, $"Unable to create employee: {result.Errors}");
+            }
+        }
+
+        public async Task<string> LoginEmployeeAsync(LoginEmployeeCommand command)
+        {
+            var employee = await _userManager.FindByEmailAsync(command.Email);
+            if (employee == null)
+            {
+                throw new CustomException(CustomErrorCode.EmployeeNotFound, $"Unable to find employee with email: {command.Email}");
+            }
+
+            if (await _userManager.CheckPasswordAsync(employee, command.Password) == false)
+            {
+                throw new CustomException(CustomErrorCode.WrongPassword, $"Unable to login employee with email: {command.Email} - wrong password");
+            }
+
+            var secretKey = _configuration["Jwt:SecretKey"];
+            if(secretKey == null)
+            {
+                throw new CustomException(CustomErrorCode.NoJwtSecretKey, "Unable to get SecretKey");
+            }
+
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
+            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, employee.Id),
+                new Claim(ClaimTypes.Email, employee.Email == null ? "" : employee.Email),
+                new Claim("surname", employee.Surname),
+                new Claim("permissions", ((int)UserPermissions.SimpleView).ToString())
+            };
+
+            var issuer = _configuration["Jwt:ValidIssuer"];
+            var audience = _configuration["Jwt:ValidAudience"];
+
+            var token = new JwtSecurityToken(
+                issuer: issuer,
+                audience: audience,
+                claims: claims,
+                expires: DateTime.UtcNow.AddDays(7),
+                signingCredentials: credentials
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         public async Task UpdateAsync(UpdateEmployeeCommand command)
         {
-            var employee = await _dbContext.Employees
-                .FirstOrDefaultAsync(p => p.Id == command.Id);
+            var employee = await _userManager.FindByIdAsync(command.Id);
 
             if (employee == null)
             {
                 throw new CustomException(CustomErrorCode.EmployeeNotFound, $"Unable to find employee with id: {command.Id}");
             }
 
-            employee.Name = command.Name;
+            if(await _userManager.CheckPasswordAsync(employee, command.Password) == false) 
+            {
+                throw new CustomException(CustomErrorCode.WrongPassword, $"Unable to update employee with id: {command.Id} - wrong password");
+            }
 
-            await _dbContext.SaveOrHandleExceptionAsync();
+            employee.UserName = command.Name == null ? employee.UserName : command.Name;
+            employee.Surname = command.Surname == null ? employee.Surname : command.Surname;
+            employee.Email = command.Email == null ? employee.Email : command.Email;
+
+            if((command.NewPassword != null && command.RePassword == null) || (command.RePassword != null && command.NewPassword == null))
+            {
+                throw new CustomException(CustomErrorCode.UnableToUpdatePassword, $"Password or RePassword was missing or not match");
+            }
+
+            if(command.NewPassword != null)
+            {
+                if(command.NewPassword != command.RePassword)
+                {
+                    throw new CustomException(CustomErrorCode.UnableToUpdatePassword, $"Password or RePassword was missing or not match");
+                }
+
+                employee.PasswordHash = _userManager.PasswordHasher.HashPassword(employee, command.NewPassword);
+            }
+
+            var result = await _userManager.UpdateAsync(employee);
+            if(result.Succeeded == false)
+            {
+                throw new CustomException(CustomErrorCode.UnableToUpdateEmployee, $"Unable to update employee: {result.Errors}");
+            }
         }
     }
 }

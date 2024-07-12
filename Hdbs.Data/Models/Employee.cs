@@ -1,20 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hdbs.Data.Models
 {
-    public class Employee
+    [Flags]
+    public enum UserPermissions
     {
-        [Key]
-        public Guid Id { get; set; }
+        None = 0,
+        SimpleView = 1 << 0,
+        AdminView = 1 << 1,
 
+        CreateEmployee = 1 << 2,
+        UpdateEmployee = 1 << 3,
+        DeleteEmployee = 1 << 4,
+
+        CreateLocation = 1 << 5,
+        UpdateLocation = 1 << 6,
+        DeleteLocation = 1 << 7,
+
+        CreateDesk = 1 << 8,
+        UpdateDesk = 1 << 9,
+        DeleteDesk = 1 << 10,
+    }
+
+    public class Employee : IdentityUser
+    {
         [Required]
-        public string Name { get; set; } = null!;
-
+        public string Surname { get; set; } = null!;
         public ICollection<Reservation> Reservations { get; set; } = [];
+        public UserPermissions Permissions { get; set; }
     }
 }

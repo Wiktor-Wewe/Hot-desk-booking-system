@@ -4,6 +4,7 @@ using Hdbs.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hdbs.Data.Migrations
 {
     [DbContext(typeof(HdbsContext))]
-    partial class HdbsContextModelSnapshot : ModelSnapshot
+    [Migration("20240712131153_add_permissions_to_emplyees")]
+    partial class add_permissions_to_emplyees
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

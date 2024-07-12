@@ -16,5 +16,12 @@ namespace Hdbs.Core.Enums
         EmployeeNotFound = 405,
         InvalidSearchBy = 406,
         InvalidOrderBy = 407,
+        PasswordsNotMatch = 408,
+        UnableToCreateEmployee = 409,
+        UnableToDeleteEmployee = 410,
+        UnableToUpdatePassword = 411,
+        UnableToUpdateEmployee = 412,
+        WrongPassword = 413,
+        NoJwtSecretKey = 414
     }
 }

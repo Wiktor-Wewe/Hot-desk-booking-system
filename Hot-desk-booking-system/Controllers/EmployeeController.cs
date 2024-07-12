@@ -17,6 +17,13 @@ namespace Hot_desk_booking_system.Controllers
             _mediator = mediator;
         }
 
+        [HttpPost("login")]
+        public async Task<IActionResult> LoginEmployeeAsync([FromBody] LoginEmployeeCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(result.ToResponseDto());
+        }
+
         [HttpGet]
         public async Task<IActionResult> ListEmployeeAsync([FromQuery] ListEmployeesQuery query)
         {
@@ -25,7 +32,7 @@ namespace Hot_desk_booking_system.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetEmployeeAsync([FromRoute] Guid id)
+        public async Task<IActionResult> GetEmployeeAsync([FromRoute] string id)
         {
             var query = new GetEmployeeQuery { Id = id };
             var result = await _mediator.Send(query);
@@ -40,7 +47,7 @@ namespace Hot_desk_booking_system.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateEmployeeAsync([FromRoute] Guid id, [FromBody] UpdateEmployeeCommand command)
+        public async Task<IActionResult> UpdateEmployeeAsync([FromRoute] string id, [FromBody] UpdateEmployeeCommand command)
         {
             command.Id = id;
             await _mediator.Send(command);
@@ -48,7 +55,7 @@ namespace Hot_desk_booking_system.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteEmployeeAsync([FromRoute] Guid id)
+        public async Task<IActionResult> DeleteEmployeeAsync([FromRoute] string id)
         {
             var command = new DeleteEmployeeCommand { Id = id };
             await _mediator.Send(command);

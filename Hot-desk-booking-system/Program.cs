@@ -9,6 +9,14 @@ using Hdbs.Services.Implementations;
 using Hot_desk_booking_system.Extensions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.OpenApi.Models;
+using System.Security.Claims;
+using Hdbs.Core.CustomExceptions;
+using Hdbs.Core.Enums;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +31,69 @@ builder.Services.AddControllers(options =>
 // Set Database
 builder.Services.AddDbContext<HdbsContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Add Identity
+builder.Services.AddIdentity<Employee, IdentityRole>()
+    .AddEntityFrameworkStores<HdbsContext>()
+    .AddDefaultTokenProviders();
+
+// Configure Identity
+builder.Services.Configure<IdentityOptions>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = true;
+    options.Password.RequiredLength = 6;
+    options.Password.RequiredUniqueChars = 1;
+});
+
+// Get SecretKey from configuration
+var secretKey = builder.Configuration["Jwt:SecretKey"];
+if (secretKey == null)
+{
+    throw new CustomException(CustomErrorCode.NoJwtSecretKey, "Unable to get SecretKey");
+}
+
+// Add JWT
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:ValidIssuer"],
+        ValidAudience = builder.Configuration["Jwt:ValidAudience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+        NameClaimType = ClaimTypes.NameIdentifier,
+        RoleClaimType = ClaimTypes.Role
+    };
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("SimpleView", policy => policy.RequireClaim("permissions", ((int)UserPermissions.SimpleView).ToString()));
+    options.AddPolicy("AdminView", policy => policy.RequireClaim("permissions", ((int)UserPermissions.AdminView).ToString()));
+
+    options.AddPolicy("CreateEmployee", policy => policy.RequireClaim("permissions", ((int)UserPermissions.CreateEmployee).ToString()));
+    options.AddPolicy("UpdateEmployee", policy => policy.RequireClaim("permissions", ((int)UserPermissions.UpdateEmployee).ToString()));
+    options.AddPolicy("DeleteEmployee", policy => policy.RequireClaim("permissions", ((int)UserPermissions.DeleteEmployee).ToString()));
+
+    options.AddPolicy("CreateLocation", policy => policy.RequireClaim("permissions", ((int)UserPermissions.CreateLocation).ToString()));
+    options.AddPolicy("UpdateLocation", policy => policy.RequireClaim("permissions", ((int)UserPermissions.UpdateLocation).ToString()));
+    options.AddPolicy("DeleteLocation", policy => policy.RequireClaim("permissions", ((int)UserPermissions.DeleteLocation).ToString()));
+
+    options.AddPolicy("CreateDesk", policy => policy.RequireClaim("permissions", ((int)UserPermissions.CreateDesk).ToString()));
+    options.AddPolicy("UpdateDesk", policy => policy.RequireClaim("permissions", ((int)UserPermissions.UpdateDesk).ToString()));
+    options.AddPolicy("DeleteDesk", policy => policy.RequireClaim("permissions", ((int)UserPermissions.DeleteDesk).ToString()));
+});
 
 // Configure Serilog
 builder.Host.UseSerilog((context, configuration) =>
@@ -47,7 +118,36 @@ builder.Services.AddMediatRHandlers(
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+// Add Swagger with JWT
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Hot desk booking system API", Version = "v1" });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new List<string>()
+        }
+    });
+});
 
 var app = builder.Build();
 
@@ -62,6 +162,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

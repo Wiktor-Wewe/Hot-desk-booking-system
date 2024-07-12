@@ -35,7 +35,10 @@ namespace Hdbs.Repositories.Implementations
             return new EmployeeDto
             {
                 Id = employee.Id,
-                Name = employee.Name,
+                Name = employee.UserName == null ? "" : employee.UserName,
+                Surname = employee.Surname,
+                Email = employee.Email == null ? "" : employee.Email,
+                Permissions = employee.Permissions,
                 Reservations = employee.Reservations
             };
         }
@@ -73,7 +76,10 @@ namespace Hdbs.Repositories.Implementations
             return await PaginatedList<EmployeeListDto>.CreateAsync(query.Select(e => new EmployeeListDto
             {
                 Id = e.Id,
-                Name = e.Name,
+                Name = e.UserName == null ? "" : e.UserName,
+                Surname = e.Surname,
+                Email = e.Email == null ? "" : e.Email,
+                Permissions = e.Permissions,
                 Reservations = e.Reservations
             }).AsQueryable()
                 .AsNoTracking(),
