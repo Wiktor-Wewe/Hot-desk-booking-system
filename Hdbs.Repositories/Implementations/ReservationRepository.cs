@@ -24,6 +24,7 @@ namespace Hdbs.Repositories.Implementations
         {
             var reservation = await _dbContext.Reservations
                 .Include(r => r.Desk)
+                .ThenInclude(d => d.Location)
                 .Include(r => r.Employee)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(r => r.Id == query.Id);
@@ -37,9 +38,14 @@ namespace Hdbs.Repositories.Implementations
             {
                 Id = reservation.Id,
                 DeskId = reservation.DeskId,
-                Desk = reservation.Desk,
+                DeskName = reservation.Desk.Name,
+                LocationName = reservation.Desk.Location.Name,
+                LocationCity = reservation.Desk.Location.City,
+                LocationCountry = reservation.Desk.Location.Country,
                 EmployeeId = reservation.EmployeeId,
-                Employee = reservation.Employee,
+                EmployeeName = reservation.Employee.UserName == null ? "" : reservation.Employee.UserName,
+                EmployeeSurname = reservation.Employee.Surname,
+                EmployeeEmail = reservation.Employee.Email == null ? "" : reservation.Employee.Email,
                 StartDate = reservation.StartDate,
                 EndDate = reservation.EndDate,
                 IsExpired = reservation.IsExpiredRightNow(),
@@ -82,9 +88,12 @@ namespace Hdbs.Repositories.Implementations
             {
                 Id = d.Id,
                 DeskId = d.DeskId,
-                Desk = d.Desk,
+                LocationName = d.Desk.Location.Name,
+                LocationCity = d.Desk.Location.City,
+                LocationCountry = d.Desk.Location.Country,
                 EmployeeId = d.EmployeeId,
-                Employee = d.Employee,
+                EmployeeName = d.Employee.UserName == null ? "" : d.Employee.UserName,
+                EmployeeSurname = d.Employee.Surname,
                 StartDate = d.StartDate,
                 EndDate = d.EndDate,
                 IsExpired = d.IsExpiredRightNow(),

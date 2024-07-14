@@ -5,6 +5,7 @@ using Hdbs.Data.Models;
 using Hdbs.Repositories.Interfaces;
 using Hdbs.Transfer.Employees.Data;
 using Hdbs.Transfer.Employees.Queries;
+using Hdbs.Transfer.Reservations.Data;
 using Hdbs.Transfer.Shared.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
@@ -38,8 +39,7 @@ namespace Hdbs.Repositories.Implementations
                 Name = employee.UserName == null ? "" : employee.UserName,
                 Surname = employee.Surname,
                 Email = employee.Email == null ? "" : employee.Email,
-                Permissions = employee.Permissions.ToString(),
-                Reservations = employee.Reservations
+                Permissions = employee.Permissions.ToString()
             };
         }
 
@@ -78,9 +78,66 @@ namespace Hdbs.Repositories.Implementations
                 Id = e.Id,
                 Name = e.UserName == null ? "" : e.UserName,
                 Surname = e.Surname,
-                Email = e.Email == null ? "" : e.Email,
-                Permissions = e.Permissions.ToString(),
-                Reservations = e.Reservations
+                Email = e.Email == null ? "" : e.Email
+            }).AsQueryable()
+                .AsNoTracking(),
+                listAsyncQuery.PageIndex,
+                listAsyncQuery.PageSize
+            );
+        }
+
+        public async Task<PaginatedList<ReservationListDto>> ListReservationsAsync(ListReservationsByEmployeeQuery listAsyncQuery)
+        {
+            if(listAsyncQuery.EmployeeId == null)
+            {
+                throw new CustomException(CustomErrorCode.EmployeeNotFound, "Unable to find employee with id: null");
+            }
+
+            var query = _dbContext.Reservations
+                .Include(r => r.Desk)
+                .Include(r => r.Employee)
+                .Where(r => r.EmployeeId == listAsyncQuery.EmployeeId)
+                .AsNoTracking()
+                .OrderBy(d => d.Id);
+
+            if (!string.IsNullOrEmpty(listAsyncQuery.SearchFor) && !string.IsNullOrEmpty(listAsyncQuery.SearchBy))
+            {
+                if (Utils.IsValidProperty<Reservation>(listAsyncQuery.SearchBy) == false)
+                {
+                    throw new CustomException(CustomErrorCode.InvalidSearchBy, $"Unable to search by: {listAsyncQuery.SearchBy}");
+                }
+
+                listAsyncQuery.SearchFor = listAsyncQuery.SearchFor.Replace("'", "''");
+                query = (IOrderedQueryable<Reservation>)query.Where($"{listAsyncQuery.SearchBy}.Contains(@0)", listAsyncQuery.SearchFor);
+            }
+
+            if (!string.IsNullOrEmpty(listAsyncQuery.OrderBy))
+            {
+                if (Utils.IsValidProperty<Reservation>(listAsyncQuery.OrderBy) == false)
+                {
+                    throw new CustomException(CustomErrorCode.InvalidOrderBy, $"Unable to order by: {listAsyncQuery.OrderBy}");
+                }
+
+                query = listAsyncQuery.Ascending
+                    ? query.OrderBy(listAsyncQuery.OrderBy)
+                    : query.OrderBy($"{listAsyncQuery.OrderBy} descending");
+            }
+
+            return await PaginatedList<ReservationListDto>.CreateAsync(query.Select(d => new ReservationListDto
+            {
+                Id = d.Id,
+                DeskId = d.DeskId,
+                LocationName = d.Desk.Location.Name,
+                LocationCity = d.Desk.Location.City,
+                LocationCountry = d.Desk.Location.Country,
+                EmployeeId = d.EmployeeId,
+                EmployeeName = d.Employee.UserName == null ? "" : d.Employee.UserName,
+                EmployeeSurname = d.Employee.Surname,
+                StartDate = d.StartDate,
+                EndDate = d.EndDate,
+                IsExpired = d.IsExpiredRightNow(),
+                IsActive = !d.IsFreeRightNow()
+
             }).AsQueryable()
                 .AsNoTracking(),
                 listAsyncQuery.PageIndex,

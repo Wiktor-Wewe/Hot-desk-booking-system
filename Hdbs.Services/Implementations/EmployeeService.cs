@@ -59,8 +59,7 @@ namespace Hdbs.Services.Implementations
                 Name = employeeFromDb.UserName == null ? "" : employeeFromDb.UserName,
                 Surname = employeeFromDb.Surname,
                 Email = employeeFromDb.Email == null ? "" : employeeFromDb.Email,
-                Permissions = employeeFromDb.Permissions.ToString(),
-                Reservations = employeeFromDb.Reservations
+                Permissions = employeeFromDb.Permissions.ToString()
             };
         }
 

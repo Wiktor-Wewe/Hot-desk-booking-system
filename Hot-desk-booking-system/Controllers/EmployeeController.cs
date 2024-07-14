@@ -24,7 +24,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
-        [HttpPost("{id}/permissions")]
+        [HttpPost("{id}/Permissions")]
         public async Task<IActionResult> SetPermissionsAsync([FromRoute] string id, [FromBody] SetPermissionsForEmployeeCommand command)
         {
             command.Id = id;
@@ -43,6 +43,14 @@ namespace Hot_desk_booking_system.Controllers
         public async Task<IActionResult> GetEmployeeAsync([FromRoute] string id)
         {
             var query = new GetEmployeeQuery { Id = id };
+            var result = await _mediator.Send(query);
+            return Ok(result.ToResponseDto());
+        }
+
+        [HttpGet("{id}/Reservations")]
+        public async Task<IActionResult> ListReservationsByEmployeeAsync([FromRoute] string id, [FromQuery] ListReservationsByEmployeeQuery query)
+        {
+            query.EmployeeId = id;
             var result = await _mediator.Send(query);
             return Ok(result.ToResponseDto());
         }

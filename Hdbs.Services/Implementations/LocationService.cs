@@ -47,8 +47,7 @@ namespace Hdbs.Services.Implementations
                 Description = locationFromDb.Description,
                 Address = locationFromDb.Address,
                 City = locationFromDb.City,
-                Country = locationFromDb.Country,
-                Desks = locationFromDb.Desks,
+                Country = locationFromDb.Country
             };
         }
 

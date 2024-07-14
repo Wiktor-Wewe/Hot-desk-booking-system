@@ -13,7 +13,5 @@ namespace Hdbs.Transfer.Employees.Data
         public string Name { get; set; } = null!;
         public string Surname { get; set; } = null!;
         public string Email { get; set; } = null!;
-        public string Permissions { get; set; } = null!;
-        public ICollection<Reservation>? Reservations { get; set; }
     }
 }

@@ -15,6 +15,5 @@ namespace Hdbs.Transfer.Locations.Data
         public string Address { get; set; } = null!;
         public string City { get; set; } = null!;
         public string Country { get; set; } = null!;
-        public ICollection<Desk>? Desks { get; set; }
     }
 }

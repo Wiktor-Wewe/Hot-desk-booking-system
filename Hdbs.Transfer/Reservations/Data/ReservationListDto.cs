@@ -11,9 +11,12 @@ namespace Hdbs.Transfer.Reservations.Data
     {
         public Guid Id { get; set; }
         public Guid DeskId { get; set; }
-        public Desk? Desk { get; set; }
+        public string LocationName { get; set; } = null!;
+        public string LocationCity { get; set; } = null!;
+        public string LocationCountry {  get; set; } = null!;
         public string EmployeeId { get; set; } = null!;
-        public Employee? Employee { get; set; }
+        public string EmployeeName { get; set; } = null!;
+        public string EmployeeSurname { get; set; } = null!;
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public bool IsExpired { get; set; }

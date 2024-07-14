@@ -33,15 +33,25 @@ namespace Hdbs.Repositories.Implementations
                 throw new CustomException(CustomErrorCode.DeskNotFound, $"Unable to find desk with id: {query.Id}");
             }
 
+            if (query.StartDate == null) query.StartDate = DateTime.Now;
+            if (query.EndDate == null) query.EndDate = DateTime.Now;
+            if (query.StartDate > query.EndDate)
+            {
+                var temp = query.StartDate;
+                query.StartDate = query.EndDate;
+                query.EndDate = temp;
+            }
+
             return new DeskDto
             {
                 Id = desk.Id,
                 Name = desk.Name,
                 Description = desk.Description,
                 LocationId = desk.LocationId,
-                Location = desk.Location,
-                IsAvailable = desk.Reservations?.LastOrDefault(r => r.IsFreeRightNow() == false) == null ? true : false,
-                Reservations = desk.Reservations
+                LocationName = desk.Location.Name,
+                LocationCity = desk.Location.City,
+                LocationCountry = desk.Location.Country,
+                IsAvailable = desk.Reservations.LastOrDefault(r => (query.EndDate.Value.Date < r.StartDate.Date || query.StartDate.Value.Date > r.EndDate.Date) == false) == null
             };
         }
 
@@ -76,28 +86,27 @@ namespace Hdbs.Repositories.Implementations
                     : query.OrderBy($"{listAsyncQuery.OrderBy} descending");
             }
 
-            var desks = await PaginatedList<DeskListDto>.CreateAsync(query.Select(d => new DeskListDto
+            if (listAsyncQuery.StartDate == null) listAsyncQuery.StartDate = DateTime.Now;
+            if (listAsyncQuery.EndDate == null) listAsyncQuery.EndDate = DateTime.Now;
+            if (listAsyncQuery.StartDate > listAsyncQuery.EndDate)
+            {
+                var temp = listAsyncQuery.StartDate;
+                listAsyncQuery.StartDate = listAsyncQuery.EndDate;
+                listAsyncQuery.EndDate = temp;
+            }
+
+            return await PaginatedList<DeskListDto>.CreateAsync(query.Select(d => new DeskListDto
             {
                 Id = d.Id,
                 Name = d.Name,
-                Description = d.Description,
                 LocationId = d.LocationId,
-                Location = d.Location,
-                IsAvailable = false,
-                Reservations = d.Reservations
-                
+                LocationName = d.Location.Name,
+                IsAvailable = d.Reservations.LastOrDefault(r => (listAsyncQuery.EndDate.Value.Date < r.StartDate.Date || listAsyncQuery.StartDate.Value.Date > r.EndDate.Date) == false) == null
             }).AsQueryable()
                 .AsNoTracking(),
                 listAsyncQuery.PageIndex,
                 listAsyncQuery.PageSize
             );
-
-            foreach(var desk in desks)
-            {
-                desk.IsAvailable = desk.Reservations?.LastOrDefault(r => r.IsFreeRightNow() == false) == null ? true : false;
-            }
-
-            return desks;
         }
     }
 }

@@ -11,5 +11,7 @@ namespace Hdbs.Transfer.Desks.Queries
     public class GetDeskQuery : IRequest<DeskDto>
     {
         public Guid Id { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 }

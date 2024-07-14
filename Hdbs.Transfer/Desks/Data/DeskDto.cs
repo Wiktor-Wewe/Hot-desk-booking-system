@@ -13,8 +13,9 @@ namespace Hdbs.Transfer.Desks.Data
         public string? Name { get; set; }
         public string? Description { get; set; }
         public Guid? LocationId { get; set; }
-        public Location? Location { get; set; } 
+        public string LocationName { get; set; } = null!;
+        public string LocationCity { get; set; } = null!;
+        public string LocationCountry { get; set; } = null!;
         public bool? IsAvailable { get; set; }
-        public ICollection<Reservation>? Reservations { get; set; }
     }
 }

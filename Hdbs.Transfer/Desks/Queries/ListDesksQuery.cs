@@ -12,5 +12,7 @@ namespace Hdbs.Transfer.Desks.Queries
 {
     public class ListDesksQuery : ListQuery, IRequest<PaginatedList<DeskListDto>>
     {
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 }

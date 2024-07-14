@@ -4,6 +4,8 @@ using Hdbs.Data.Models;
 using Hdbs.Services.Interfaces;
 using Hdbs.Transfer.Desks.Commands;
 using Hdbs.Transfer.Desks.Data;
+using Hdbs.Transfer.Reservations.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hdbs.Services.Implementations
@@ -11,10 +13,12 @@ namespace Hdbs.Services.Implementations
     public class DeskService : IDeskService
     {
         private readonly HdbsContext _dbContext;
+        private readonly UserManager<Employee> _userManager;
 
-        public DeskService(HdbsContext dbContext)
+        public DeskService(HdbsContext dbContext, UserManager<Employee> userManager)
         {
             _dbContext = dbContext;
+            _userManager = userManager;
         }
 
         public async Task<DeskDto> CreateAsync(CreateDeskCommand command)
@@ -55,9 +59,92 @@ namespace Hdbs.Services.Implementations
                 Name = deskFromDb.Name,
                 Description = deskFromDb.Description,
                 LocationId = deskFromDb.LocationId,
-                Location = deskFromDb.Location,
-                IsAvailable = deskFromDb.Reservations?.LastOrDefault(r => r.IsFreeRightNow() == false) == null ? true : false,
-                Reservations = deskFromDb.Reservations
+                LocationName = deskFromDb.Location.Name,
+                LocationCity = deskFromDb.Location.City,
+                LocationCountry = deskFromDb.Location.Country,
+                IsAvailable = deskFromDb.Reservations?.LastOrDefault(r => r.IsFreeRightNow() == false) == null ? true : false
+            };
+        }
+
+        public async Task<ReservationDto> ReserveDeskAsync(ReserveDeskCommand command)
+        {
+            if(command.EmployeeId == null)
+            {
+                throw new CustomException(CustomErrorCode.EmployeeIdIsNull, "Unable to make reservation - Employee Id is null");
+            }
+
+            if(command.DeskId == null)
+            {
+                throw new CustomException(CustomErrorCode.DeskIdIsNull, "Unable to make reservation - Employee Id is null");
+            }
+
+            var employee = await _userManager.FindByIdAsync(command.EmployeeId);
+
+            if (employee == null)
+            {
+                throw new CustomException(CustomErrorCode.EmployeeNotFound, "Unable to make reservation - Desk Id is null");
+            }
+
+            var desk = await _dbContext.Desks
+                .Include(d => d.Reservations)
+                .FirstOrDefaultAsync(l => l.Id == command.DeskId);
+
+            if (desk == null)
+            {
+                throw new CustomException(CustomErrorCode.DeskNotFound, $"Unable to find desk with id: {command.DeskId}");
+            }
+
+            if (desk.Reservations.LastOrDefault(r => r.IsFree(command.StartDate, command.EndDate) == false) != null)
+            {
+                throw new CustomException(CustomErrorCode.DeskIsUnavailable, $"Unable to make reservation for desk with id: {command.DeskId} - desk is unavaible for this moment");
+            }
+
+            var reservation = new Reservation
+            {
+                DeskId = command.DeskId.Value,
+                Desk = desk,
+                EmployeeId = command.EmployeeId,
+                Employee = employee,
+                StartDate = command.StartDate,
+                EndDate = command.EndDate,
+            };
+
+            if (reservation.IsValid() == false)
+            {
+                throw new CustomException(CustomErrorCode.ReservationIsImpossible, $"Unable to make reservation for desk with id: {command.DeskId} - reservation is impossible");
+            }
+
+            await _dbContext.Reservations.AddAsync(reservation);
+            await _dbContext.SaveOrHandleExceptionAsync();
+
+            var reservationFromDb = await _dbContext.Reservations
+                .Include(r => r.Desk)
+                .ThenInclude(d => d.Location)
+                .Include(r => r.Employee)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.Id == reservation.Id);
+
+            if (reservationFromDb == null)
+            {
+                throw new CustomException(CustomErrorCode.ReservationNotFound, $"Unable to find reservation with id: {command.DeskId}");
+            }
+
+            return new ReservationDto
+            {
+                Id = reservationFromDb.Id,
+                DeskId = reservationFromDb.DeskId,
+                DeskName = reservationFromDb.Desk.Name,
+                LocationName = reservationFromDb.Desk.Location.Name,
+                LocationCity = reservationFromDb.Desk.Location.City,
+                LocationCountry = reservationFromDb.Desk.Location.Country,
+                EmployeeId = reservationFromDb.EmployeeId,
+                EmployeeName = reservationFromDb.Employee.UserName == null ? "" : reservationFromDb.Employee.UserName,
+                EmployeeSurname = reservationFromDb.Employee.Surname,
+                EmployeeEmail = reservationFromDb.Employee.Email == null ? "" : reservationFromDb.Employee.Email,
+                StartDate = reservationFromDb.StartDate,
+                EndDate = reservationFromDb.EndDate,
+                IsExpired = reservationFromDb.IsExpiredRightNow(),
+                IsActive = !reservationFromDb.IsFreeRightNow()
             };
         }
 
