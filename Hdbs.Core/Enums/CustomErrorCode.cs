@@ -30,6 +30,7 @@ namespace Hdbs.Core.Enums
         EmployeeIdIsNull = 419,
         DeskIdIsNull = 420,
         WrongDateTimeFormat = 421,
-        WrongGuidFormat = 422
+        WrongGuidFormat = 422,
+        UnableToCreateFirstAdmin = 423,
     }
 }

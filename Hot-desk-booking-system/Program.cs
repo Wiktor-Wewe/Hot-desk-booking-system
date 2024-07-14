@@ -17,6 +17,7 @@ using Microsoft.OpenApi.Models;
 using System.Security.Claims;
 using Hdbs.Core.CustomExceptions;
 using Hdbs.Core.Enums;
+using Hot_desk_booking_system.DbInitializer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -168,5 +169,25 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Initialize Database
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<HdbsContext>();
+
+        DbInitializer.Initialize(services).GetAwaiter().GetResult();
+
+        context.SaveChanges();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An error occurred while initializing the database.");
+        throw;
+    }
+}
 
 app.Run();
