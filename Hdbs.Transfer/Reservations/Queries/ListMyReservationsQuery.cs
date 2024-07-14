@@ -13,5 +13,6 @@ namespace Hdbs.Transfer.Reservations.Queries
     public class ListMyReservationsQuery : ListQuery, IRequest<PaginatedList<ReservationListDto>>
     {
         public string? EmployeeId { get; set; }
+        public bool OnlyActive { get; set; } = false;
     }
 }

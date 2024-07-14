@@ -13,5 +13,6 @@ namespace Hdbs.Transfer.Desks.Queries
     public class ListReservationsByDeskQuery : ListQuery, IRequest<PaginatedList<ReservationListDto>>
     {
         public Guid? DeskId { get; set; }
+        public bool OnlyActive { get; set; } = false;
     }
 }

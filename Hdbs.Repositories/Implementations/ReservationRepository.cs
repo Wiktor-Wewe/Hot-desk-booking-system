@@ -62,6 +62,11 @@ namespace Hdbs.Repositories.Implementations
                 .AsNoTracking()
                 .OrderBy(d => d.Id);
 
+            if (listAsyncQuery.OnlyActive)
+            {
+                query = (IOrderedQueryable<Reservation>)query.Where(r => (DateTime.Now.Date < r.StartDate.Date || DateTime.Now.Date > r.EndDate.Date) == false);
+            }
+
             query = (IOrderedQueryable<Reservation>)PaginatedList<Reservation>.ApplySearchAndSorting(query, listAsyncQuery.SearchBy, listAsyncQuery.SearchFor, listAsyncQuery.OrderBy, listAsyncQuery.Ascending);
 
             return await PaginatedList<ReservationListDto>.CreateAsync(query.Select(d => new ReservationListDto
@@ -99,6 +104,11 @@ namespace Hdbs.Repositories.Implementations
                 .Where(r => r.EmployeeId == listAsyncQuery.EmployeeId)
                 .AsNoTracking()
                 .OrderBy(d => d.Id);
+
+            if (listAsyncQuery.OnlyActive)
+            {
+                query = (IOrderedQueryable<Reservation>)query.Where(r => (DateTime.Now.Date < r.StartDate.Date || DateTime.Now.Date > r.EndDate.Date) == false);
+            }
 
             query = (IOrderedQueryable<Reservation>)PaginatedList<Reservation>.ApplySearchAndSorting(query, listAsyncQuery.SearchBy, listAsyncQuery.SearchFor, listAsyncQuery.OrderBy, listAsyncQuery.Ascending);
 

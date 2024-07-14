@@ -13,5 +13,6 @@ namespace Hdbs.Transfer.Locations.Queries
     public class ListReservationsByLocationQuery : ListQuery, IRequest<PaginatedList<ReservationListDto>>
     {
         public Guid? LocationId { get; set; }
+        public bool OnlyActive { get; set; } = false;
     }
 }

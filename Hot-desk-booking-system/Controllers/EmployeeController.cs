@@ -48,7 +48,7 @@ namespace Hot_desk_booking_system.Controllers
         }
 
         [HttpGet("{id}/Reservations")]
-        public async Task<IActionResult> ListReservationsByEmployeeAsync([FromRoute] string id, [FromQuery] ListReservationsByEmployeeQuery query)
+        public async Task<IActionResult> ListReservationsAsync([FromRoute] string id, [FromQuery] ListReservationsByEmployeeQuery query)
         {
             query.EmployeeId = id;
             var result = await _mediator.Send(query);

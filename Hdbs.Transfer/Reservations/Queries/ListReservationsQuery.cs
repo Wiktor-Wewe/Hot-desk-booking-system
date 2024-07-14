@@ -12,5 +12,6 @@ namespace Hdbs.Transfer.Reservations.Queries
 {
     public class ListReservationsQuery : ListQuery, IRequest<PaginatedList<ReservationListDto>>
     {
+        public bool OnlyActive { get; set; } = false;
     }
 }
