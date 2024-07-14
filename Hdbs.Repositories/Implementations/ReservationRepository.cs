@@ -7,6 +7,7 @@ using Hdbs.Transfer.Reservations.Data;
 using Hdbs.Transfer.Reservations.Queries;
 using Hdbs.Transfer.Shared.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 using System.Linq.Dynamic.Core;
 
 namespace Hdbs.Repositories.Implementations
@@ -61,28 +62,45 @@ namespace Hdbs.Repositories.Implementations
                 .AsNoTracking()
                 .OrderBy(d => d.Id);
 
-            if (!string.IsNullOrEmpty(listAsyncQuery.SearchFor) && !string.IsNullOrEmpty(listAsyncQuery.SearchBy))
-            {
-                if (Utils.IsValidProperty<Reservation>(listAsyncQuery.SearchBy) == false)
-                {
-                    throw new CustomException(CustomErrorCode.InvalidSearchBy, $"Unable to search by: {listAsyncQuery.SearchBy}");
-                }
+            query = (IOrderedQueryable<Reservation>)PaginatedList<Reservation>.ApplySearchAndSorting(query, listAsyncQuery.SearchBy, listAsyncQuery.SearchFor, listAsyncQuery.OrderBy, listAsyncQuery.Ascending);
 
-                listAsyncQuery.SearchFor = listAsyncQuery.SearchFor.Replace("'", "''");
-                query = (IOrderedQueryable<Reservation>)query.Where($"{listAsyncQuery.SearchBy}.Contains(@0)", listAsyncQuery.SearchFor);
+            return await PaginatedList<ReservationListDto>.CreateAsync(query.Select(d => new ReservationListDto
+            {
+                Id = d.Id,
+                DeskId = d.DeskId,
+                LocationName = d.Desk.Location.Name,
+                LocationCity = d.Desk.Location.City,
+                LocationCountry = d.Desk.Location.Country,
+                EmployeeId = d.EmployeeId,
+                EmployeeName = d.Employee.UserName == null ? "" : d.Employee.UserName,
+                EmployeeSurname = d.Employee.Surname,
+                StartDate = d.StartDate,
+                EndDate = d.EndDate,
+                IsExpired = d.IsExpiredRightNow(),
+                IsActive = !d.IsFreeRightNow()
+
+            }).AsQueryable()
+                .AsNoTracking(),
+                listAsyncQuery.PageIndex,
+                listAsyncQuery.PageSize
+            );
+        }
+
+        public async Task<PaginatedList<ReservationListDto>> ListMyReservationsAsync(ListMyReservationsQuery listAsyncQuery)
+        {
+            if(listAsyncQuery.EmployeeId == null)
+            {
+                throw new CustomException(CustomErrorCode.EmployeeIdIsNull, "Unable to find employee with id: null");
             }
 
-            if (!string.IsNullOrEmpty(listAsyncQuery.OrderBy))
-            {
-                if (Utils.IsValidProperty<Reservation>(listAsyncQuery.OrderBy) == false)
-                {
-                    throw new CustomException(CustomErrorCode.InvalidOrderBy, $"Unable to order by: {listAsyncQuery.OrderBy}");
-                }
+            var query = _dbContext.Reservations
+                .Include(r => r.Desk)
+                .Include(r => r.Employee)
+                .Where(r => r.EmployeeId == listAsyncQuery.EmployeeId)
+                .AsNoTracking()
+                .OrderBy(d => d.Id);
 
-                query = listAsyncQuery.Ascending
-                    ? query.OrderBy(listAsyncQuery.OrderBy)
-                    : query.OrderBy($"{listAsyncQuery.OrderBy} descending");
-            }
+            query = (IOrderedQueryable<Reservation>)PaginatedList<Reservation>.ApplySearchAndSorting(query, listAsyncQuery.SearchBy, listAsyncQuery.SearchFor, listAsyncQuery.OrderBy, listAsyncQuery.Ascending);
 
             return await PaginatedList<ReservationListDto>.CreateAsync(query.Select(d => new ReservationListDto
             {

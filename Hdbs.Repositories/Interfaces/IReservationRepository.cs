@@ -12,6 +12,7 @@ namespace Hdbs.Repositories.Interfaces
     public interface IReservationRepository
     {
         Task<PaginatedList<ReservationListDto>> ListAsync(ListReservationsQuery listAsyncQuery);
+        Task<PaginatedList<ReservationListDto>> ListMyReservationsAsync(ListMyReservationsQuery listAsyncQuery);
         Task<ReservationDto> GetAsync(GetReservationQuery query);
     }
 }

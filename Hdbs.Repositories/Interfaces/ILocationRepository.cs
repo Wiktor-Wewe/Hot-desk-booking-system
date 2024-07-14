@@ -3,12 +3,6 @@ using Hdbs.Transfer.Locations.Data;
 using Hdbs.Transfer.Locations.Queries;
 using Hdbs.Transfer.Reservations.Data;
 using Hdbs.Transfer.Shared.Data;
-using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hdbs.Repositories.Interfaces
 {

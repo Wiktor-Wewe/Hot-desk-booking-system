@@ -50,28 +50,7 @@ namespace Hdbs.Repositories.Implementations
                 .AsNoTracking()
                 .OrderBy(e => e.Id);
 
-            if (!string.IsNullOrEmpty(listAsyncQuery.SearchFor) && !string.IsNullOrEmpty(listAsyncQuery.SearchBy))
-            {
-                if (Utils.IsValidProperty<Employee>(listAsyncQuery.SearchBy) == false)
-                {
-                    throw new CustomException(CustomErrorCode.InvalidSearchBy, $"Unable to search by: {listAsyncQuery.SearchBy}");
-                }
-
-                listAsyncQuery.SearchFor = listAsyncQuery.SearchFor.Replace("'", "''");
-                query = (IOrderedQueryable<Employee>)query.Where($"{listAsyncQuery.SearchBy}.Contains(@0)", listAsyncQuery.SearchFor);
-            }
-
-            if (!string.IsNullOrEmpty(listAsyncQuery.OrderBy))
-            {
-                if (Utils.IsValidProperty<Employee>(listAsyncQuery.OrderBy) == false)
-                {
-                    throw new CustomException(CustomErrorCode.InvalidOrderBy, $"Unable to order by: {listAsyncQuery.OrderBy}");
-                }
-
-                query = listAsyncQuery.Ascending
-                    ? query.OrderBy(listAsyncQuery.OrderBy)
-                    : query.OrderBy($"{listAsyncQuery.OrderBy} descending");
-            }
+            query = (IOrderedQueryable<Employee>)PaginatedList<Employee>.ApplySearchAndSorting(query, listAsyncQuery.SearchBy, listAsyncQuery.SearchFor, listAsyncQuery.OrderBy, listAsyncQuery.Ascending);
 
             return await PaginatedList<EmployeeListDto>.CreateAsync(query.Select(e => new EmployeeListDto
             {
@@ -100,28 +79,7 @@ namespace Hdbs.Repositories.Implementations
                 .AsNoTracking()
                 .OrderBy(d => d.Id);
 
-            if (!string.IsNullOrEmpty(listAsyncQuery.SearchFor) && !string.IsNullOrEmpty(listAsyncQuery.SearchBy))
-            {
-                if (Utils.IsValidProperty<Reservation>(listAsyncQuery.SearchBy) == false)
-                {
-                    throw new CustomException(CustomErrorCode.InvalidSearchBy, $"Unable to search by: {listAsyncQuery.SearchBy}");
-                }
-
-                listAsyncQuery.SearchFor = listAsyncQuery.SearchFor.Replace("'", "''");
-                query = (IOrderedQueryable<Reservation>)query.Where($"{listAsyncQuery.SearchBy}.Contains(@0)", listAsyncQuery.SearchFor);
-            }
-
-            if (!string.IsNullOrEmpty(listAsyncQuery.OrderBy))
-            {
-                if (Utils.IsValidProperty<Reservation>(listAsyncQuery.OrderBy) == false)
-                {
-                    throw new CustomException(CustomErrorCode.InvalidOrderBy, $"Unable to order by: {listAsyncQuery.OrderBy}");
-                }
-
-                query = listAsyncQuery.Ascending
-                    ? query.OrderBy(listAsyncQuery.OrderBy)
-                    : query.OrderBy($"{listAsyncQuery.OrderBy} descending");
-            }
+            query = (IOrderedQueryable<Reservation>)PaginatedList<Reservation>.ApplySearchAndSorting(query, listAsyncQuery.SearchBy, listAsyncQuery.SearchFor, listAsyncQuery.OrderBy, listAsyncQuery.Ascending);
 
             return await PaginatedList<ReservationListDto>.CreateAsync(query.Select(d => new ReservationListDto
             {

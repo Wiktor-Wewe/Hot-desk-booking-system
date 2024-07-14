@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Hdbs.Core.CustomExceptions;
+using Hdbs.Core.Enums;
+using Hdbs.Core.Utils;
+using Hdbs.Data.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Dynamic.Core;
+
 
 namespace Hdbs.Transfer.Shared.Data
 {
@@ -35,6 +36,57 @@ namespace Hdbs.Transfer.Shared.Data
                 items = await source.Skip(pageIndex * pageSize).Take(pageSize).ToListAsync();
 
             return new PaginatedList<T>(items, count, pageIndex, pageSize);
+        }
+
+        public static IQueryable<T> ApplySearchAndSorting<T>(IQueryable<T> query, string? searchBy, string? searchFor, string? orderBy, bool ascending)
+        {
+            if (!string.IsNullOrEmpty(searchFor) && !string.IsNullOrEmpty(searchBy))
+            {
+                if (Utils.IsValidProperty<T>(searchBy) == false)
+                {
+                    throw new CustomException(CustomErrorCode.InvalidSearchBy, $"Unable to search by: {searchBy}");
+                }
+
+                var propertyType = typeof(T).GetProperty(searchBy)?.PropertyType;
+                if (propertyType == typeof(DateTime) || propertyType == typeof(DateTime?))
+                {
+                    if (DateTime.TryParse(searchFor, out DateTime searchDate))
+                    {
+                        query = query.Where(r =>
+                            EF.Property<DateTime>(r, "StartDate") <= searchDate &&
+                            EF.Property<DateTime>(r, "EndDate") >= searchDate
+                        );
+                    }
+                    else
+                    {
+                        throw new CustomException(CustomErrorCode.WrongDateTimeFormat, $"Unable to parse search date: {searchFor}");
+                    }
+                }
+                else if (propertyType == typeof(Guid) || propertyType == typeof(Guid?))
+                {
+                    searchFor = searchFor.Replace("'", "''");
+                    query = query.Where($"{searchBy}.ToString().Contains(@0)", searchFor);
+                }
+                else
+                {
+                    searchFor = searchFor.Replace("'", "''");
+                    query = query.Where($"{searchBy}.Contains(@0)", searchFor);
+                }
+            }
+
+            if (!string.IsNullOrEmpty(orderBy))
+            {
+                if (Utils.IsValidProperty<T>(orderBy) == false)
+                {
+                    throw new CustomException(CustomErrorCode.InvalidOrderBy, $"Unable to order by: {orderBy}");
+                }
+
+                query = ascending
+                    ? query.OrderBy(orderBy)
+                    : query.OrderBy($"{orderBy} descending");
+            }
+
+            return query;
         }
     }
 }

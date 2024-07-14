@@ -36,6 +36,14 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
+        [HttpGet("{id}/Reservations")]
+        public async Task<IActionResult> ListReservationsAsync([FromRoute] Guid id, [FromQuery] ListReservationsByDeskQuery query)
+        {
+            query.DeskId = id;
+            var result = await _mediator.Send(query);
+            return Ok(result.ToResponseDto());
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateDeskAsync([FromBody] CreateDeskCommand command)
         {

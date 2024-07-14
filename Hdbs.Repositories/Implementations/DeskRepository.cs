@@ -5,6 +5,7 @@ using Hdbs.Data.Models;
 using Hdbs.Repositories.Interfaces;
 using Hdbs.Transfer.Desks.Data;
 using Hdbs.Transfer.Desks.Queries;
+using Hdbs.Transfer.Reservations.Data;
 using Hdbs.Transfer.Shared.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Dynamic.Core;
@@ -63,28 +64,7 @@ namespace Hdbs.Repositories.Implementations
                 .AsNoTracking()
                 .OrderBy(d => d.Id);
 
-            if (!string.IsNullOrEmpty(listAsyncQuery.SearchFor) && !string.IsNullOrEmpty(listAsyncQuery.SearchBy))
-            {
-                if (Utils.IsValidProperty<Desk>(listAsyncQuery.SearchBy) == false)
-                {
-                    throw new CustomException(CustomErrorCode.InvalidSearchBy, $"Unable to search by: {listAsyncQuery.SearchBy}");
-                }
-
-                listAsyncQuery.SearchFor = listAsyncQuery.SearchFor.Replace("'", "''");
-                query = (IOrderedQueryable<Desk>)query.Where($"{listAsyncQuery.SearchBy}.Contains(@0)", listAsyncQuery.SearchFor);
-            }
-
-            if (!string.IsNullOrEmpty(listAsyncQuery.OrderBy))
-            {
-                if(Utils.IsValidProperty<Desk>(listAsyncQuery.OrderBy) == false)
-                {
-                    throw new CustomException(CustomErrorCode.InvalidOrderBy, $"Unable to order by: {listAsyncQuery.OrderBy}");
-                }
-
-                query = listAsyncQuery.Ascending
-                    ? query.OrderBy(listAsyncQuery.OrderBy)
-                    : query.OrderBy($"{listAsyncQuery.OrderBy} descending");
-            }
+            query = (IOrderedQueryable<Desk>)PaginatedList<Desk>.ApplySearchAndSorting(query, listAsyncQuery.SearchBy, listAsyncQuery.SearchFor, listAsyncQuery.OrderBy, listAsyncQuery.Ascending);
 
             if (listAsyncQuery.StartDate == null) listAsyncQuery.StartDate = DateTime.Now;
             if (listAsyncQuery.EndDate == null) listAsyncQuery.EndDate = DateTime.Now;
@@ -102,6 +82,44 @@ namespace Hdbs.Repositories.Implementations
                 LocationId = d.LocationId,
                 LocationName = d.Location.Name,
                 IsAvailable = d.Reservations.LastOrDefault(r => (listAsyncQuery.EndDate.Value.Date < r.StartDate.Date || listAsyncQuery.StartDate.Value.Date > r.EndDate.Date) == false) == null
+            }).AsQueryable()
+                .AsNoTracking(),
+                listAsyncQuery.PageIndex,
+                listAsyncQuery.PageSize
+            );
+        }
+
+        public async Task<PaginatedList<ReservationListDto>> ListReservationsAsync(ListReservationsByDeskQuery listAsyncQuery)
+        {
+            if(listAsyncQuery.DeskId == null)
+            {
+                throw new CustomException(CustomErrorCode.DeskNotFound, "Unable to find desk with id: null");
+            }
+
+            var query = _dbContext.Reservations
+                .Include(r => r.Desk)
+                .Include(r => r.Employee)
+                .Where(r => r.DeskId == listAsyncQuery.DeskId.Value)
+                .AsNoTracking()
+                .OrderBy(d => d.Id);
+
+            query = (IOrderedQueryable<Reservation>)PaginatedList<Reservation>.ApplySearchAndSorting(query, listAsyncQuery.SearchBy, listAsyncQuery.SearchFor, listAsyncQuery.OrderBy, listAsyncQuery.Ascending);
+
+            return await PaginatedList<ReservationListDto>.CreateAsync(query.Select(d => new ReservationListDto
+            {
+                Id = d.Id,
+                DeskId = d.DeskId,
+                LocationName = d.Desk.Location.Name,
+                LocationCity = d.Desk.Location.City,
+                LocationCountry = d.Desk.Location.Country,
+                EmployeeId = d.EmployeeId,
+                EmployeeName = d.Employee.UserName == null ? "" : d.Employee.UserName,
+                EmployeeSurname = d.Employee.Surname,
+                StartDate = d.StartDate,
+                EndDate = d.EndDate,
+                IsExpired = d.IsExpiredRightNow(),
+                IsActive = !d.IsFreeRightNow()
+
             }).AsQueryable()
                 .AsNoTracking(),
                 listAsyncQuery.PageIndex,

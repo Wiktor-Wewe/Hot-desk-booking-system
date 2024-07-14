@@ -28,6 +28,8 @@ namespace Hdbs.Core.Enums
         ReservationIsImpossible = 417,
         TooLateToUpdateReservation = 418,
         EmployeeIdIsNull = 419,
-        DeskIdIsNull = 420
+        DeskIdIsNull = 420,
+        WrongDateTimeFormat = 421,
+        WrongGuidFormat = 422
     }
 }
