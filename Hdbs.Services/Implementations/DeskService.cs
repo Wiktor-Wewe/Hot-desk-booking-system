@@ -41,6 +41,7 @@ namespace Hdbs.Services.Implementations
             var deskFromDb = await _dbContext.Desks
                 .Include(d => d.Location)
                 .Include(d => d.Reservations)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(d => d.Id == desk.Id);
 
             if(deskFromDb == null)
@@ -55,7 +56,7 @@ namespace Hdbs.Services.Implementations
                 Description = deskFromDb.Description,
                 LocationId = deskFromDb.LocationId,
                 Location = deskFromDb.Location,
-                IsAvailable = deskFromDb.Reservations?.FirstOrDefault(r => r.IsValid()) == null ? true : false,
+                IsAvailable = deskFromDb.Reservations?.LastOrDefault(r => r.IsFreeRightNow() == false) == null ? true : false,
                 Reservations = deskFromDb.Reservations
             };
         }
@@ -70,7 +71,7 @@ namespace Hdbs.Services.Implementations
                 throw new CustomException(CustomErrorCode.DeskNotFound, $"Unable to find desk with id: {command.Id}");
             }
 
-            if(desk.Reservations?.FirstOrDefault(r => r.IsValid()) != null)
+            if (desk.Reservations?.LastOrDefault(r => r.IsFreeRightNow() == false) != null)
             {
                 throw new CustomException(CustomErrorCode.DeskIsUnavailable, $"Unable to delete desk with id: {command.Id} - Desk is unavailable right now");
             }
@@ -87,6 +88,11 @@ namespace Hdbs.Services.Implementations
             if (desk == null)
             {
                 throw new CustomException(CustomErrorCode.DeskNotFound, $"Unable to find desk with id: {command.Id}");
+            }
+
+            if (desk.Reservations?.LastOrDefault(r => r.IsFreeRightNow() == false) != null)
+            {
+                throw new CustomException(CustomErrorCode.DeskIsUnavailable, $"Unable to edit desk with id: {command.Id} - Desk is unavailable right now");
             }
 
             desk.Name = command.Name == null ? desk.Name : command.Name;

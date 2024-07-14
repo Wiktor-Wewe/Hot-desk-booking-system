@@ -40,7 +40,7 @@ namespace Hdbs.Repositories.Implementations
                 Description = desk.Description,
                 LocationId = desk.LocationId,
                 Location = desk.Location,
-                IsAvailable = desk.Reservations?.FirstOrDefault(r => r.IsValid()) == null ? true : false,
+                IsAvailable = desk.Reservations?.LastOrDefault(r => r.IsFreeRightNow() == false) == null ? true : false,
                 Reservations = desk.Reservations
             };
         }
@@ -94,7 +94,7 @@ namespace Hdbs.Repositories.Implementations
 
             foreach(var desk in desks)
             {
-                desk.IsAvailable = desk.Reservations?.FirstOrDefault(r => r.IsValid()) == null ? true : false;
+                desk.IsAvailable = desk.Reservations?.LastOrDefault(r => r.IsFreeRightNow() == false) == null ? true : false;
             }
 
             return desks;

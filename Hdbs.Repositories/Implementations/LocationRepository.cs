@@ -3,16 +3,12 @@ using Hdbs.Core.Enums;
 using Hdbs.Core.Utils;
 using Hdbs.Data.Models;
 using Hdbs.Repositories.Interfaces;
+using Hdbs.Transfer.Desks.Data;
 using Hdbs.Transfer.Locations.Data;
 using Hdbs.Transfer.Locations.Queries;
 using Hdbs.Transfer.Shared.Data;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Dynamic.Core;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hdbs.Repositories.Implementations
 {
@@ -71,6 +67,62 @@ namespace Hdbs.Repositories.Implementations
             );
         }
 
+        public async Task<PaginatedList<DeskListDto>> ListDesksAsync(ListDesksByLocationQuery listAsyncQuery)
+        {
+            var query = _dbContext.Desks
+                .Include(d => d.Location)
+                .Include(d => d.Reservations)
+                .Where(d => d.LocationId == listAsyncQuery.LocationId)
+                .AsNoTracking()
+                .OrderBy(d => d.Id);
+
+            if (!string.IsNullOrEmpty(listAsyncQuery.SearchFor) && !string.IsNullOrEmpty(listAsyncQuery.SearchBy))
+            {
+                if (Utils.IsValidProperty<Desk>(listAsyncQuery.SearchBy) == false)
+                {
+                    throw new CustomException(CustomErrorCode.InvalidSearchBy, $"Unable to search by: {listAsyncQuery.SearchBy}");
+                }
+
+                listAsyncQuery.SearchFor = listAsyncQuery.SearchFor.Replace("'", "''");
+                query = (IOrderedQueryable<Desk>)query.Where($"{listAsyncQuery.SearchBy}.Contains(@0)", listAsyncQuery.SearchFor);
+            }
+
+            if (!string.IsNullOrEmpty(listAsyncQuery.OrderBy))
+            {
+                if (Utils.IsValidProperty<Desk>(listAsyncQuery.OrderBy) == false)
+                {
+                    throw new CustomException(CustomErrorCode.InvalidOrderBy, $"Unable to order by: {listAsyncQuery.OrderBy}");
+                }
+
+                query = listAsyncQuery.Ascending
+                    ? query.OrderBy(listAsyncQuery.OrderBy)
+                    : query.OrderBy($"{listAsyncQuery.OrderBy} descending");
+            }
+
+            var desks = await PaginatedList<DeskListDto>.CreateAsync(query.Select(d => new DeskListDto
+            {
+                Id = d.Id,
+                Name = d.Name,
+                Description = d.Description,
+                LocationId = d.LocationId,
+                Location = d.Location,
+                IsAvailable = false,
+                Reservations = d.Reservations
+
+            }).AsQueryable()
+                .AsNoTracking(),
+                listAsyncQuery.PageIndex,
+                listAsyncQuery.PageSize
+            );
+
+            foreach (var desk in desks)
+            {
+                desk.IsAvailable = desk.Reservations?.LastOrDefault(r => r.IsFreeRightNow() == false) == null ? true : false;
+            }
+
+            return desks;
+        }
+
         public async Task<LocationDto> GetAsync(GetLocationQuery query)
         {
             var location = await _dbContext.Locations
@@ -93,6 +145,6 @@ namespace Hdbs.Repositories.Implementations
                 Country = location.Country,
                 Desks = location.Desks
             };
-        } 
+        }
     }
 }

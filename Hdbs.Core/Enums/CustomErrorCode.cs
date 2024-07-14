@@ -24,5 +24,8 @@ namespace Hdbs.Core.Enums
         WrongPassword = 413,
         NoJwtSecretKey = 414,
         PermissionError = 415,
+        ReservationNotFound = 416,
+        ReservationIsImpossible = 417,
+        TooLateToUpdateReservation = 418,
     }
 }

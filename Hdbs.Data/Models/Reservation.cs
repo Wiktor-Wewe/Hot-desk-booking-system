@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Routing;
 
 namespace Hdbs.Data.Models
 {
@@ -29,7 +30,28 @@ namespace Hdbs.Data.Models
 
         public bool IsValid()
         {
-            return StartDate < EndDate && (EndDate - StartDate).Days <= 7;
+            return StartDate.Date <= EndDate.Date && (EndDate.Date - StartDate.Date).Days <= 7;
+        }
+
+        public bool IsExpiredRightNow()
+        {
+            return DateTime.Now.Date > EndDate.Date;
+        }
+
+        public bool IsFreeRightNow()
+        {
+            var date = DateTime.Now.Date;
+            return date < StartDate.Date || date > EndDate.Date;
+        }
+
+        public bool IsFree(DateTime startDate, DateTime endDate)
+        {
+            if (startDate.Date > endDate.Date)
+            {
+                throw new ArgumentException("endDate must be greater than or equal to startDate");
+            }
+
+            return endDate.Date < StartDate.Date || startDate.Date > EndDate.Date;
         }
     }
 }

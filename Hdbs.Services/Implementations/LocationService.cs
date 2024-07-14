@@ -32,6 +32,7 @@ namespace Hdbs.Services.Implementations
             await _dbContext.SaveOrHandleExceptionAsync();
 
             var locationFromDb = await _dbContext.Locations
+                .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == location.Id);
 
             if (locationFromDb == null)

@@ -24,6 +24,14 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
+        [HttpGet("{id}/Desks")]
+        public async Task<IActionResult> ListDesksByLocationAsync([FromRoute] Guid id, [FromQuery] ListDesksByLocationQuery query)
+        {
+            query.LocationId = id;
+            var result = await _mediator.Send(query);
+            return Ok(result.ToResponseDto());
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetLocationAsync([FromRoute] Guid id)
         {
