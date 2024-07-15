@@ -2,10 +2,12 @@
 using Hdbs.Transfer.Locations.Commands;
 using Hdbs.Transfer.Locations.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Hot_desk_booking_system.Controllers
 {
+    [Authorize]
     [Route("api/Location")]
     [ApiController]
     public class LocationController : Controller
@@ -17,6 +19,7 @@ namespace Hot_desk_booking_system.Controllers
             _mediator = mediator;
         }
 
+        [Authorize(Policy = "SimpleView")]
         [HttpGet]
         public async Task<IActionResult> ListLocationsAsync([FromQuery] ListLocationsQuery query)
         {
@@ -24,6 +27,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
+        [Authorize(Policy = "SimpleView")]
         [HttpGet("{id}/Desks")]
         public async Task<IActionResult> ListDesksAsync([FromRoute] Guid id, [FromQuery] ListDesksByLocationQuery query)
         {
@@ -32,6 +36,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
+        [Authorize(Policy = "SimpleView")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetLocationAsync([FromRoute] Guid id)
         {
@@ -40,6 +45,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
+        [Authorize(Policy = "AdminView")]
         [HttpGet("{id}/Reservations")]
         public async Task<IActionResult> ListReservationsAsync([FromRoute] Guid id, [FromQuery] ListReservationsByLocationQuery query)
         {
@@ -48,7 +54,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
-
+        [Authorize(Policy = "CreateLocation")]
         [HttpPost]
         public async Task<IActionResult> CreateLocationAsync([FromBody] CreateLocationCommand command)
         {
@@ -56,6 +62,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
+        [Authorize(Policy = "UpdateLocation")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateLocationAsync([FromRoute] Guid id, [FromBody] UpdateLocationCommand command)
         {
@@ -64,6 +71,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok();
         }
 
+        [Authorize(Policy = "DeleteLocation")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLocationAsync([FromRoute] Guid id)
         {

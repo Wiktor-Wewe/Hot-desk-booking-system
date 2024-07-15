@@ -24,6 +24,10 @@ namespace Hdbs.Data.Models
 
         SetPermissions = 1 << 11,
         SetEmployeeStatus = 1 << 12,
+
+        CreateReservation = 1 << 13,
+        UpdateReservation = 1 << 14,
+        DeleteReservation = 1 << 15,
     }
 
     public class Employee : IdentityUser

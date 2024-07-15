@@ -114,7 +114,7 @@ namespace Hdbs.Services.Implementations
                 new Claim(ClaimTypes.NameIdentifier, employee.Id),
                 new Claim(ClaimTypes.Email, employee.Email == null ? "" : employee.Email),
                 new Claim("surname", employee.Surname),
-                new Claim("permissions", ((int)UserPermissions.SimpleView).ToString())
+                new Claim("permissions", ((int)employee.Permissions).ToString())
             };
 
             var issuer = _configuration["Jwt:ValidIssuer"];
@@ -165,6 +165,10 @@ namespace Hdbs.Services.Implementations
 
             if (command.SetPermissions) userPermissions |= UserPermissions.SetPermissions;
             if (command.SetEmployeeStatus) userPermissions |= UserPermissions.SetEmployeeStatus;
+
+            if (command.CreateReservation) userPermissions |= UserPermissions.CreateReservation;
+            if (command.UpdateReservation) userPermissions |= UserPermissions.UpdateReservation;
+            if (command.DeleteReservation) userPermissions |= UserPermissions.DeleteReservation;
 
             employee.Permissions = userPermissions;
             

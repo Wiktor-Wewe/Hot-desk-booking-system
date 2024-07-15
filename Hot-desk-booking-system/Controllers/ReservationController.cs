@@ -5,10 +5,13 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Hot_desk_booking_system.Controllers
 {
+    [Authorize]
     [Route("api/Reservation")]
+    [ApiController]
     public class ReservationController : Controller
     {
         private readonly IMediator _mediator;
@@ -18,6 +21,7 @@ namespace Hot_desk_booking_system.Controllers
             _mediator = mediator;
         }
 
+        [Authorize(Policy = "AdminView")]
         [HttpGet]
         public async Task<IActionResult> ListReservationsAsync([FromQuery] ListReservationsQuery query)
         {
@@ -25,6 +29,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
+        [Authorize(Policy = "AdminView")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetReservationAsync([FromRoute] Guid id)
         {
@@ -33,6 +38,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
+        [Authorize(Policy = "SimpleView")]
         [HttpGet("MyReservations")]
         public async Task<IActionResult> ListMyReservationsAsync([FromQuery] ListMyReservationsQuery query)
         {
@@ -41,6 +47,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
+        [Authorize(Policy = "CreateReservation")]
         [HttpPost]
         public async Task<IActionResult> CreateReservationAsync([FromBody] CreateReservationCommand command)
         {
@@ -48,6 +55,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
+        [Authorize(Policy = "UpdateReservation")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateReservationAsync([FromRoute] Guid id, [FromBody] UpdateReservationCommand command)
         {
@@ -56,6 +64,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok();
         }
 
+        [Authorize(Policy = "DeleteReservation")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReservationAsync([FromRoute] Guid id)
         {

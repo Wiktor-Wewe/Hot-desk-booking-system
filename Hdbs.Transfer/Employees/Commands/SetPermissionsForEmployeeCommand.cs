@@ -29,5 +29,9 @@ namespace Hdbs.Transfer.Employees.Commands
 
         public bool SetPermissions { get; set; } = false;
         public bool SetEmployeeStatus { get; set; } = false;
+
+        public bool CreateReservation { get; set; } = false;
+        public bool UpdateReservation { get; set; } = false;
+        public bool DeleteReservation { get; set; } = false;
     }
 }

@@ -18,6 +18,8 @@ using System.Security.Claims;
 using Hdbs.Core.CustomExceptions;
 using Hdbs.Core.Enums;
 using Hot_desk_booking_system.DbInitializer;
+using Hot_desk_booking_system.PermissionHandler;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,22 +80,33 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// Add permissions handler
+builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
+
+// Add permissions
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("SimpleView", policy => policy.RequireClaim("permissions", ((int)UserPermissions.SimpleView).ToString()));
-    options.AddPolicy("AdminView", policy => policy.RequireClaim("permissions", ((int)UserPermissions.AdminView).ToString()));
+    options.AddPolicy("SimpleView", policy => policy.Requirements.Add(new PermissionRequirement(UserPermissions.SimpleView)));
+    options.AddPolicy("AdminView", policy => policy.Requirements.Add(new PermissionRequirement(UserPermissions.AdminView)));
 
-    options.AddPolicy("CreateEmployee", policy => policy.RequireClaim("permissions", ((int)UserPermissions.CreateEmployee).ToString()));
-    options.AddPolicy("UpdateEmployee", policy => policy.RequireClaim("permissions", ((int)UserPermissions.UpdateEmployee).ToString()));
-    options.AddPolicy("DeleteEmployee", policy => policy.RequireClaim("permissions", ((int)UserPermissions.DeleteEmployee).ToString()));
+    options.AddPolicy("CreateEmployee", policy => policy.Requirements.Add(new PermissionRequirement(UserPermissions.CreateEmployee)));
+    options.AddPolicy("UpdateEmployee", policy => policy.Requirements.Add(new PermissionRequirement(UserPermissions.UpdateEmployee)));
+    options.AddPolicy("DeleteEmployee", policy => policy.Requirements.Add(new PermissionRequirement(UserPermissions.DeleteEmployee)));
 
-    options.AddPolicy("CreateLocation", policy => policy.RequireClaim("permissions", ((int)UserPermissions.CreateLocation).ToString()));
-    options.AddPolicy("UpdateLocation", policy => policy.RequireClaim("permissions", ((int)UserPermissions.UpdateLocation).ToString()));
-    options.AddPolicy("DeleteLocation", policy => policy.RequireClaim("permissions", ((int)UserPermissions.DeleteLocation).ToString()));
+    options.AddPolicy("CreateLocation", policy => policy.Requirements.Add(new PermissionRequirement(UserPermissions.CreateLocation)));
+    options.AddPolicy("UpdateLocation", policy => policy.Requirements.Add(new PermissionRequirement(UserPermissions.UpdateLocation)));
+    options.AddPolicy("DeleteLocation", policy => policy.Requirements.Add(new PermissionRequirement(UserPermissions.DeleteLocation)));
 
-    options.AddPolicy("CreateDesk", policy => policy.RequireClaim("permissions", ((int)UserPermissions.CreateDesk).ToString()));
-    options.AddPolicy("UpdateDesk", policy => policy.RequireClaim("permissions", ((int)UserPermissions.UpdateDesk).ToString()));
-    options.AddPolicy("DeleteDesk", policy => policy.RequireClaim("permissions", ((int)UserPermissions.DeleteDesk).ToString()));
+    options.AddPolicy("CreateDesk", policy => policy.Requirements.Add(new PermissionRequirement(UserPermissions.CreateDesk)));
+    options.AddPolicy("UpdateDesk", policy => policy.Requirements.Add(new PermissionRequirement(UserPermissions.UpdateDesk)));
+    options.AddPolicy("DeleteDesk", policy => policy.Requirements.Add(new PermissionRequirement(UserPermissions.DeleteDesk)));
+
+    options.AddPolicy("SetPermissions", policy => policy.Requirements.Add(new PermissionRequirement(UserPermissions.SetPermissions)));
+    options.AddPolicy("SetEmployeeStatus", policy => policy.Requirements.Add(new PermissionRequirement(UserPermissions.SetEmployeeStatus)));
+
+    options.AddPolicy("CreateReservation", policy => policy.Requirements.Add(new PermissionRequirement(UserPermissions.CreateReservation)));
+    options.AddPolicy("UpdateReservation", policy => policy.Requirements.Add(new PermissionRequirement(UserPermissions.UpdateReservation)));
+    options.AddPolicy("DeleteReservation", policy => policy.Requirements.Add(new PermissionRequirement(UserPermissions.DeleteReservation)));
 });
 
 // Configure Serilog

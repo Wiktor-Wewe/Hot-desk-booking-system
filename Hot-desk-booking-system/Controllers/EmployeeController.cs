@@ -2,11 +2,12 @@
 using Hdbs.Transfer.Employees.Commands;
 using Hdbs.Transfer.Employees.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Hot_desk_booking_system.Controllers
 {
+    [Authorize]
     [Route("api/Employee")]
     [ApiController]
     public class EmployeeController : Controller
@@ -18,6 +19,7 @@ namespace Hot_desk_booking_system.Controllers
             _mediator = mediator;
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> LoginEmployeeAsync([FromBody] LoginEmployeeCommand command)
         {
@@ -25,6 +27,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
+        [Authorize(Policy = "SetPermissions")]
         [HttpPost("{id}/Permissions")]
         public async Task<IActionResult> SetPermissionsAsync([FromRoute] string id, [FromBody] SetPermissionsForEmployeeCommand command)
         {
@@ -33,6 +36,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok();
         }
 
+        [Authorize(Policy = "AdminView")]
         [HttpGet]
         public async Task<IActionResult> ListEmployeeAsync([FromQuery] ListEmployeesQuery query)
         {
@@ -40,6 +44,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
+        [Authorize(Policy = "AdminView")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetEmployeeAsync([FromRoute] string id)
         {
@@ -48,6 +53,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
+        [Authorize(Policy = "AdminView")]
         [HttpGet("{id}/Reservations")]
         public async Task<IActionResult> ListReservationsAsync([FromRoute] string id, [FromQuery] ListReservationsByEmployeeQuery query)
         {
@@ -56,6 +62,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
+        [Authorize(Policy = "CreateEmployee")]
         [HttpPost]
         public async Task<IActionResult> CreateEmployeeAsync([FromBody] CreateEmployeeCommand command)
         {
@@ -63,6 +70,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
+        [Authorize(Policy = "UpdateEmployee")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateEmployeeAsync([FromRoute] string id, [FromBody] UpdateEmployeeCommand command)
         {
@@ -71,6 +79,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok();
         }
 
+        [Authorize(Policy = "DeleteEmployee")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEmployeeAsync([FromRoute] string id)
         {
@@ -79,6 +88,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok();
         }
 
+        [Authorize(Policy = "SetEmployeeStatus")]
         [HttpPut("{id}/SetStatus")]
         public async Task<IActionResult> SetStatusAsync([FromRoute] string id, [FromBody] SetStatusForEmployeeCommand command)
         {

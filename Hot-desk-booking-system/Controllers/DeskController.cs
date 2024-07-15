@@ -8,9 +8,9 @@ using System.Security.Claims;
 
 namespace Hot_desk_booking_system.Controllers
 {
+    [Authorize]
     [Route("api/Desk")]
     [ApiController]
-    //[Authorize]
     public class DeskController : Controller
     {
         private readonly IMediator _mediator;
@@ -20,7 +20,7 @@ namespace Hot_desk_booking_system.Controllers
             _mediator = mediator;
         }
 
-        //[Authorize(Policy = "SimpleView")]
+        [Authorize(Policy = "SimpleView")]
         [HttpGet]
         public async Task<IActionResult> ListDesksAsync([FromQuery] ListDesksQuery query)
         {
@@ -28,6 +28,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
+        [Authorize(Policy = "SimpleView")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDeskAsync([FromRoute] Guid id)
         {
@@ -36,6 +37,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
+        [Authorize(Policy = "AdminView")]
         [HttpGet("{id}/Reservations")]
         public async Task<IActionResult> ListReservationsAsync([FromRoute] Guid id, [FromQuery] ListReservationsByDeskQuery query)
         {
@@ -44,6 +46,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
+        [Authorize(Policy = "CreateDesk")]
         [HttpPost]
         public async Task<IActionResult> CreateDeskAsync([FromBody] CreateDeskCommand command)
         {
@@ -51,6 +54,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
+        [Authorize(Policy = "SimpleView")]
         [HttpPost("{id}/Reserve")]
         public async Task<IActionResult> ReserveDeskAsync([FromRoute] Guid id, [FromBody] ReserveDeskCommand command)
         {
@@ -60,6 +64,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(response.ToResponseDto());
         }
 
+        [Authorize(Policy = "UpdateDesk")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateDeskAsync([FromRoute] Guid id, [FromBody] UpdateDeskCommand command)
         {
@@ -68,6 +73,7 @@ namespace Hot_desk_booking_system.Controllers
             return Ok();
         }
 
+        [Authorize(Policy = "DeleteDesk")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDeskAsync([FromRoute] Guid id)
         {
