@@ -132,7 +132,7 @@ namespace Hdbs.Services.Implementations
 
             if (desk == null)
             {
-                throw new CustomException(CustomErrorCode.DeskNotFound, $"Unable to find desk with id: {command.Id}");
+                throw new CustomException(CustomErrorCode.DeskNotFound, $"Unable to find desk with id: {command.DeskId}");
             }
 
             if (desk.ForcedUnavailable)
@@ -143,6 +143,52 @@ namespace Hdbs.Services.Implementations
             if (desk.Reservations.LastOrDefault(r => r.IsFree(reservation.StartDate, reservation.EndDate) == false) != null)
             {
                 throw new CustomException(CustomErrorCode.DeskIsUnavailable, $"Unable to update reservation with id: {command.Id} - desk is unavaible for this moment");
+            }
+
+            reservation.DeskId = desk.Id;
+            reservation.Desk = desk;
+            await _dbContext.SaveOrHandleExceptionAsync();
+        }
+
+        public async Task UpdateMyAsync(UpdateMyReservationCommand command)
+        {
+            if(command.EmployeeId == null)
+            {
+                throw new CustomException(CustomErrorCode.EmployeeIdIsNull, "Unable to find employee with id: null");
+            }
+
+            var reservation = await _dbContext.Reservations
+                .Include(r => r.Employee)
+                .Include(r => r.Desk)
+                .Where(r => r.Employee.Id == command.EmployeeId)
+                .FirstOrDefaultAsync(r => r.Id == command.ReservationId);
+
+            if (reservation == null)
+            {
+                throw new CustomException(CustomErrorCode.ReservationNotFound, $"Unable to find reservation with id: {command.ReservationId}");
+            }
+
+            if (DateTime.Now > reservation.StartDate || reservation.StartDate - DateTime.Now > new TimeSpan(24, 0, 0))
+            {
+                throw new CustomException(CustomErrorCode.TooLateToUpdateReservation, $"Unable to update reservation with id: {command.ReservationId} - it's too late");
+            }
+
+            var desk = await _dbContext.Desks
+                .FirstOrDefaultAsync(d => d.Id == command.DeskId);
+
+            if (desk == null)
+            {
+                throw new CustomException(CustomErrorCode.DeskNotFound, $"Unable to find desk with id: {command.DeskId}");
+            }
+
+            if (desk.ForcedUnavailable)
+            {
+                throw new CustomException(CustomErrorCode.DeskIsUnavailable, $"Unable to update reservation with id: {command.ReservationId} - desk is unavaible for this moment");
+            }
+
+            if (desk.Reservations.LastOrDefault(r => r.IsFree(reservation.StartDate, reservation.EndDate) == false) != null)
+            {
+                throw new CustomException(CustomErrorCode.DeskIsUnavailable, $"Unable to update reservation with id: {command.ReservationId} - desk is unavaible for this moment");
             }
 
             reservation.DeskId = desk.Id;

@@ -12,6 +12,7 @@ namespace Hdbs.Services.Interfaces
     {
         Task<ReservationDto> CreateAsync(CreateReservationCommand command);
         Task UpdateAsync(UpdateReservationCommand command);
+        Task UpdateMyAsync(UpdateMyReservationCommand command);
         Task DeleteAsync(DeleteReservationCommand command);
     }
 }

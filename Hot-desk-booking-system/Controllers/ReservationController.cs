@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Hot_desk_booking_system.Controllers
 {
@@ -60,6 +61,16 @@ namespace Hot_desk_booking_system.Controllers
         public async Task<IActionResult> UpdateReservationAsync([FromRoute] Guid id, [FromBody] UpdateReservationCommand command)
         {
             command.Id = id;
+            await _mediator.Send(command);
+            return Ok();
+        }
+
+        [Authorize(Policy = "SimpleView")]
+        [HttpPut("{id}/Update")]
+        public async Task<IActionResult> UpdateMyReservationAsync([FromRoute] Guid id, [FromBody] UpdateMyReservationCommand command)
+        {
+            command.ReservationId = id;
+            command.EmployeeId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             await _mediator.Send(command);
             return Ok();
         }
