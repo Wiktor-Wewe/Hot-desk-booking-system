@@ -14,5 +14,6 @@ namespace Hdbs.Transfer.Desks.Data
         public Guid LocationId { get; set; }
         public string LocationName { get; set; } = null!;
         public bool IsAvailable { get; set; }
+        public string? EmployeeId { get; set; }
     }
 }

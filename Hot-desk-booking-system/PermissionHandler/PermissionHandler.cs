@@ -17,14 +17,25 @@ namespace Hot_desk_booking_system.PermissionHandler
     {
         protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionRequirement requirement)
         {
-            var permissionsClaim = context.User.Claims.FirstOrDefault(c => c.Type == "permissions");
-            if (permissionsClaim != null && int.TryParse(permissionsClaim.Value, out int permissions))
+            if (context.User == null)
             {
-                if ((permissions & (int)requirement.RequiredPermission) == (int)requirement.RequiredPermission)
+                return Task.CompletedTask;
+            }
+
+            var permissionsClaim = context.User.FindFirst(c => c.Type == "permissions")?.Value;
+            if (permissionsClaim == null)
+            {
+                return Task.CompletedTask;
+            }
+
+            if (Enum.TryParse(permissionsClaim, out UserPermissions userPermissions))
+            {
+                if ((userPermissions & requirement.RequiredPermission) != 0)
                 {
                     context.Succeed(requirement);
                 }
             }
+
             return Task.CompletedTask;
         }
     }

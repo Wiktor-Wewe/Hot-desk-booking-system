@@ -107,6 +107,9 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("CreateReservation", policy => policy.Requirements.Add(new PermissionRequirement(UserPermissions.CreateReservation)));
     options.AddPolicy("UpdateReservation", policy => policy.Requirements.Add(new PermissionRequirement(UserPermissions.UpdateReservation)));
     options.AddPolicy("DeleteReservation", policy => policy.Requirements.Add(new PermissionRequirement(UserPermissions.DeleteReservation)));
+
+    options.AddPolicy("SimpleViewORAdminView", policy =>
+        policy.Requirements.Add(new PermissionRequirement(UserPermissions.SimpleView | UserPermissions.AdminView)));
 });
 
 // Configure Serilog

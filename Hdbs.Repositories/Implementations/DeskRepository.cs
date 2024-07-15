@@ -75,13 +75,16 @@ namespace Hdbs.Repositories.Implementations
                 listAsyncQuery.EndDate = temp;
             }
 
+            var isAdminView = listAsyncQuery.Permissions == null ? false : PermissionUtils.HasPermission(listAsyncQuery.Permissions, UserPermissions.AdminView);
+
             return await PaginatedList<DeskListDto>.CreateAsync(query.Select(d => new DeskListDto
             {
                 Id = d.Id,
                 Name = d.Name,
                 LocationId = d.LocationId,
                 LocationName = d.Location.Name,
-                IsAvailable = d.Reservations.LastOrDefault(r => (listAsyncQuery.EndDate.Value.Date < r.StartDate.Date || listAsyncQuery.StartDate.Value.Date > r.EndDate.Date) == false) == null
+                IsAvailable = d.Reservations.OrderByDescending(r => r.StartDate).FirstOrDefault(r => (listAsyncQuery.EndDate.Value.Date < r.StartDate.Date || listAsyncQuery.StartDate.Value.Date > r.EndDate.Date) == false) == null,
+                EmployeeId = isAdminView ? d.Reservations.OrderByDescending(d => d.StartDate).FirstOrDefault(r => (listAsyncQuery.EndDate.Value.Date < r.StartDate.Date || listAsyncQuery.StartDate.Value.Date > r.EndDate.Date) == false).EmployeeId : null
             }).AsQueryable()
                 .AsNoTracking(),
                 listAsyncQuery.PageIndex,

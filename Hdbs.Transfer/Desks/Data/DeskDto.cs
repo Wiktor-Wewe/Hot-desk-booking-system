@@ -17,5 +17,6 @@ namespace Hdbs.Transfer.Desks.Data
         public string LocationCity { get; set; } = null!;
         public string LocationCountry { get; set; } = null!;
         public bool? IsAvailable { get; set; }
+
     }
 }

@@ -39,4 +39,13 @@ namespace Hdbs.Data.Models
         public ICollection<Reservation> Reservations { get; set; } = [];
         public UserPermissions Permissions { get; set; }
     }
+
+    public class PermissionUtils
+    {
+        public static bool HasPermission(string permissionsString, UserPermissions permissionToCheck)
+        {
+            var permissions = (UserPermissions)Enum.Parse(typeof(UserPermissions), permissionsString);
+            return (permissions & permissionToCheck) == permissionToCheck;
+        }
+    }
 }

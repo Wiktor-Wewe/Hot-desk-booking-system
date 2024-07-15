@@ -27,10 +27,11 @@ namespace Hot_desk_booking_system.Controllers
             return Ok(result.ToResponseDto());
         }
 
-        [Authorize(Policy = "SimpleView")]
+        [Authorize(Policy = "SimpleViewORAdminView")]
         [HttpGet("{id}/Desks")]
         public async Task<IActionResult> ListDesksAsync([FromRoute] Guid id, [FromQuery] ListDesksByLocationQuery query)
         {
+            query.Permissions = User.Claims.ToList().FirstOrDefault(c => c.Type == "permissions")?.Value;
             query.LocationId = id;
             var result = await _mediator.Send(query);
             return Ok(result.ToResponseDto());
