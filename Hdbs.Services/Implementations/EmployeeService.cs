@@ -33,6 +33,7 @@ namespace Hdbs.Services.Implementations
 
             var employee = new Employee
             {
+                IsDisabled = false,
                 UserName = command.Name,
                 Surname = command.Surname,
                 Email = command.Email,
@@ -56,6 +57,7 @@ namespace Hdbs.Services.Implementations
             return new EmployeeDto
             {
                 Id = employeeFromDb.Id,
+                IsDisabled = employeeFromDb.IsDisabled,
                 Name = employeeFromDb.UserName == null ? "" : employeeFromDb.UserName,
                 Surname = employeeFromDb.Surname,
                 Email = employeeFromDb.Email == null ? "" : employeeFromDb.Email,
@@ -84,6 +86,11 @@ namespace Hdbs.Services.Implementations
         {
             var employee = await _userManager.FindByEmailAsync(command.Email);
             if (employee == null)
+            {
+                throw new CustomException(CustomErrorCode.EmployeeNotFound, $"Unable to find employee with email: {command.Email}");
+            }
+
+            if (employee.IsDisabled)
             {
                 throw new CustomException(CustomErrorCode.EmployeeNotFound, $"Unable to find employee with email: {command.Email}");
             }
@@ -148,15 +155,16 @@ namespace Hdbs.Services.Implementations
             if (command.UpdateEmployee) userPermissions |= UserPermissions.UpdateEmployee;
             if (command.DeleteEmployee) userPermissions |= UserPermissions.DeleteEmployee;
             
-            if(command.CreateLocation) userPermissions |= UserPermissions.CreateLocation;
-            if(command.UpdateLocation) userPermissions |= UserPermissions.UpdateLocation;
-            if(command.DeleteLocation) userPermissions |= UserPermissions.DeleteLocation;
+            if (command.CreateLocation) userPermissions |= UserPermissions.CreateLocation;
+            if (command.UpdateLocation) userPermissions |= UserPermissions.UpdateLocation;
+            if (command.DeleteLocation) userPermissions |= UserPermissions.DeleteLocation;
 
-            if(command.CreateDesk) userPermissions |= UserPermissions.CreateDesk;
-            if(command.UpdateDesk) userPermissions |= UserPermissions.UpdateDesk;
-            if(command.DeleteDesk) userPermissions |= UserPermissions.DeleteDesk;
+            if (command.CreateDesk) userPermissions |= UserPermissions.CreateDesk;
+            if (command.UpdateDesk) userPermissions |= UserPermissions.UpdateDesk;
+            if (command.DeleteDesk) userPermissions |= UserPermissions.DeleteDesk;
 
-            if(command.SetPermissions) userPermissions |= UserPermissions.SetPermissions;
+            if (command.SetPermissions) userPermissions |= UserPermissions.SetPermissions;
+            if (command.SetEmployeeStatus) userPermissions |= UserPermissions.SetEmployeeStatus;
 
             employee.Permissions = userPermissions;
             
@@ -202,6 +210,29 @@ namespace Hdbs.Services.Implementations
 
             var result = await _userManager.UpdateAsync(employee);
             if(result.Succeeded == false)
+            {
+                throw new CustomException(CustomErrorCode.UnableToUpdateEmployee, $"Unable to update employee: {result.Errors}");
+            }
+        }
+        
+        public async Task SetStatusAsync(SetStatusForEmployeeCommand command)
+        {
+            if(command.EmployeeId == null)
+            {
+                throw new CustomException(CustomErrorCode.EmployeeNotFound, "Unable to find employee with id: null");
+            }
+
+            var employee = await _userManager.FindByIdAsync(command.EmployeeId);
+
+            if (employee == null)
+            {
+                throw new CustomException(CustomErrorCode.EmployeeNotFound, $"Unable to find employee with id: {command.EmployeeId}");
+            }
+
+            employee.IsDisabled = command.IsDisabled;
+
+            var result = await _userManager.UpdateAsync(employee);
+            if (result.Succeeded == false)
             {
                 throw new CustomException(CustomErrorCode.UnableToUpdateEmployee, $"Unable to update employee: {result.Errors}");
             }

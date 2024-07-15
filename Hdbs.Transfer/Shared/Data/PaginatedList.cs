@@ -67,6 +67,17 @@ namespace Hdbs.Transfer.Shared.Data
                     searchFor = searchFor.Replace("'", "''");
                     query = query.Where($"{searchBy}.ToString().Contains(@0)", searchFor);
                 }
+                else if (propertyType == typeof(bool) || propertyType == typeof(bool?))
+                {
+                    if (bool.TryParse(searchFor, out bool searchBool))
+                    {
+                        query = query.Where($"{searchBy} == @0", searchBool);
+                    }
+                    else
+                    {
+                        throw new CustomException(CustomErrorCode.WrongBoolFormat, $"Unable to parse search bool: {searchFor}");
+                    }
+                }
                 else
                 {
                     searchFor = searchFor.Replace("'", "''");

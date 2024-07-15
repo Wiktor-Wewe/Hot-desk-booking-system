@@ -1,13 +1,7 @@
-﻿using Hdbs.Services.Implementations;
-using Hdbs.Services.Interfaces;
+﻿using Hdbs.Services.Interfaces;
 using Hdbs.Transfer.Desks.Commands;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hdbs.Services.Handlers
 {

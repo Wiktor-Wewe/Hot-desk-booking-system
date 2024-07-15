@@ -32,5 +32,6 @@ namespace Hdbs.Core.Enums
         WrongDateTimeFormat = 421,
         WrongGuidFormat = 422,
         UnableToCreateFirstAdmin = 423,
+        WrongBoolFormat = 424,
     }
 }

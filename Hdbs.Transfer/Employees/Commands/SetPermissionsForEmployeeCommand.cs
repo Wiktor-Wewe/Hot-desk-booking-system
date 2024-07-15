@@ -28,5 +28,6 @@ namespace Hdbs.Transfer.Employees.Commands
         public bool DeleteDesk { get; set; } = false;
 
         public bool SetPermissions { get; set; } = false;
+        public bool SetEmployeeStatus { get; set; } = false;
     }
 }

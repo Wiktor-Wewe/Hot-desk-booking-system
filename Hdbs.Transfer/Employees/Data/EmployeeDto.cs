@@ -10,6 +10,7 @@ namespace Hdbs.Transfer.Employees.Data
     public class EmployeeDto
     {
         public string? Id { get; set; }
+        public bool IsDisabled { get; set; }
         public string Name { get; set; } = null!;
         public string Surname { get; set; } = null!;
         public string Email { get; set; } = null!;

@@ -36,6 +36,7 @@ namespace Hdbs.Repositories.Implementations
             return new EmployeeDto
             {
                 Id = employee.Id,
+                IsDisabled = employee.IsDisabled,
                 Name = employee.UserName == null ? "" : employee.UserName,
                 Surname = employee.Surname,
                 Email = employee.Email == null ? "" : employee.Email,
@@ -55,6 +56,7 @@ namespace Hdbs.Repositories.Implementations
             return await PaginatedList<EmployeeListDto>.CreateAsync(query.Select(e => new EmployeeListDto
             {
                 Id = e.Id,
+                IsDisabled = e.IsDisabled,
                 Name = e.UserName == null ? "" : e.UserName,
                 Surname = e.Surname,
                 Email = e.Email == null ? "" : e.Email

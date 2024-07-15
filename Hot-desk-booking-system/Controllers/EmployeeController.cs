@@ -3,6 +3,7 @@ using Hdbs.Transfer.Employees.Commands;
 using Hdbs.Transfer.Employees.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Hot_desk_booking_system.Controllers
 {
@@ -74,6 +75,14 @@ namespace Hot_desk_booking_system.Controllers
         public async Task<IActionResult> DeleteEmployeeAsync([FromRoute] string id)
         {
             var command = new DeleteEmployeeCommand { Id = id };
+            await _mediator.Send(command);
+            return Ok();
+        }
+
+        [HttpPut("{id}/SetStatus")]
+        public async Task<IActionResult> SetStatusAsync([FromRoute] string id, [FromBody] SetStatusForEmployeeCommand command)
+        {
+            command.EmployeeId = id;
             await _mediator.Send(command);
             return Ok();
         }

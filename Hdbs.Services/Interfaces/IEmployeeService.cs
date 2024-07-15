@@ -15,5 +15,6 @@ namespace Hdbs.Services.Interfaces
         Task<EmployeeDto> CreateAsync(CreateEmployeeCommand command);
         Task UpdateAsync(UpdateEmployeeCommand command);
         Task DeleteAsync(DeleteEmployeeCommand command);
+        Task SetStatusAsync(SetStatusForEmployeeCommand command);
     }
 }

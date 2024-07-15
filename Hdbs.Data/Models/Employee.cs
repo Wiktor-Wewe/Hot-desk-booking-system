@@ -23,10 +23,13 @@ namespace Hdbs.Data.Models
         DeleteDesk = 1 << 10,
 
         SetPermissions = 1 << 11,
+        SetEmployeeStatus = 1 << 12,
     }
 
     public class Employee : IdentityUser
     {
+        [Required]
+        public bool IsDisabled { get; set; } = false;
         [Required]
         public string Surname { get; set; } = null!;
         public ICollection<Reservation> Reservations { get; set; } = [];
