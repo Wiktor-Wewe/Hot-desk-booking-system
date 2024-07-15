@@ -72,7 +72,7 @@ namespace Hdbs.Repositories.Implementations
                 Name = d.Name,
                 LocationId = d.LocationId,
                 LocationName = d.Location.Name,
-                IsAvailable = d.Reservations.OrderByDescending(r => r.StartDate).FirstOrDefault(r => (listAsyncQuery.EndDate.Value.Date < r.StartDate.Date || listAsyncQuery.StartDate.Value.Date > r.EndDate.Date) == false) == null,
+                IsAvailable = d.ForcedUnavailable ? false : d.Reservations.OrderByDescending(r => r.StartDate).FirstOrDefault(r => (listAsyncQuery.EndDate.Value.Date < r.StartDate.Date || listAsyncQuery.StartDate.Value.Date > r.EndDate.Date) == false) == null,
                 EmployeeId = isAdminView ? d.Reservations.OrderByDescending(d => d.StartDate).FirstOrDefault(r => (listAsyncQuery.EndDate.Value.Date < r.StartDate.Date || listAsyncQuery.StartDate.Value.Date > r.EndDate.Date) == false).EmployeeId : null
 
             }).AsQueryable()

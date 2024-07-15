@@ -33,6 +33,7 @@ namespace Hdbs.Services.Implementations
 
             var desk = new Desk
             {
+                ForcedUnavailable = false,
                 Name = command.Name,
                 Description = command.Description,
                 LocationId = command.LocationId,
@@ -92,6 +93,11 @@ namespace Hdbs.Services.Implementations
             if (desk == null)
             {
                 throw new CustomException(CustomErrorCode.DeskNotFound, $"Unable to find desk with id: {command.DeskId}");
+            }
+
+            if (desk.ForcedUnavailable)
+            {
+                throw new CustomException(CustomErrorCode.DeskIsUnavailable, $"Unable to make reservation for desk with id: {command.DeskId} - desk is unavaible for this moment");
             }
 
             if (desk.Reservations.LastOrDefault(r => r.IsFree(command.StartDate, command.EndDate) == false) != null)
@@ -182,6 +188,7 @@ namespace Hdbs.Services.Implementations
                 throw new CustomException(CustomErrorCode.DeskIsUnavailable, $"Unable to edit desk with id: {command.Id} - Desk is unavailable right now");
             }
 
+            desk.ForcedUnavailable = command.ForcedUnavailable == null ? desk.ForcedUnavailable : command.ForcedUnavailable.Value;
             desk.Name = command.Name == null ? desk.Name : command.Name;
             desk.Description = command.Description == null ? desk.Description : command.Description;
             desk.LocationId = command.LocationId == null ? desk.LocationId : command.LocationId.Value;

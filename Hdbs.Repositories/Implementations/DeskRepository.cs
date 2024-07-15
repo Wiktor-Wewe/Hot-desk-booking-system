@@ -52,7 +52,7 @@ namespace Hdbs.Repositories.Implementations
                 LocationName = desk.Location.Name,
                 LocationCity = desk.Location.City,
                 LocationCountry = desk.Location.Country,
-                IsAvailable = desk.Reservations.LastOrDefault(r => (query.EndDate.Value.Date < r.StartDate.Date || query.StartDate.Value.Date > r.EndDate.Date) == false) == null
+                IsAvailable = desk.ForcedUnavailable ? false : desk.Reservations.LastOrDefault(r => (query.EndDate.Value.Date < r.StartDate.Date || query.StartDate.Value.Date > r.EndDate.Date) == false) == null
             };
         }
 
@@ -83,7 +83,7 @@ namespace Hdbs.Repositories.Implementations
                 Name = d.Name,
                 LocationId = d.LocationId,
                 LocationName = d.Location.Name,
-                IsAvailable = d.Reservations.OrderByDescending(r => r.StartDate).FirstOrDefault(r => (listAsyncQuery.EndDate.Value.Date < r.StartDate.Date || listAsyncQuery.StartDate.Value.Date > r.EndDate.Date) == false) == null,
+                IsAvailable = d.ForcedUnavailable ? false : d.Reservations.OrderByDescending(r => r.StartDate).FirstOrDefault(r => (listAsyncQuery.EndDate.Value.Date < r.StartDate.Date || listAsyncQuery.StartDate.Value.Date > r.EndDate.Date) == false) == null,
                 EmployeeId = isAdminView ? d.Reservations.OrderByDescending(d => d.StartDate).FirstOrDefault(r => (listAsyncQuery.EndDate.Value.Date < r.StartDate.Date || listAsyncQuery.StartDate.Value.Date > r.EndDate.Date) == false).EmployeeId : null
             }).AsQueryable()
                 .AsNoTracking(),

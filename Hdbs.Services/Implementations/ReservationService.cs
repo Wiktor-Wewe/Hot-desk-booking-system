@@ -1,5 +1,4 @@
 ﻿using Hdbs.Core.CustomExceptions;
-using Hdbs.Core.DTOs;
 using Hdbs.Core.Enums;
 using Hdbs.Data.Models;
 using Hdbs.Services.Interfaces;
@@ -7,8 +6,6 @@ using Hdbs.Transfer.Reservations.Commands;
 using Hdbs.Transfer.Reservations.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.Design.Serialization;
-using System.Resources;
 
 namespace Hdbs.Services.Implementations
 {
@@ -41,7 +38,12 @@ namespace Hdbs.Services.Implementations
                 throw new CustomException(CustomErrorCode.DeskNotFound, $"Unable to find desk with id: {command.DeskId}");
             }
 
-            if(desk.Reservations.LastOrDefault(r => r.IsFree(command.StartDate, command.EndDate) == false) != null)
+            if (desk.ForcedUnavailable)
+            {
+                throw new CustomException(CustomErrorCode.DeskIsUnavailable, $"Unable to make reservation for desk with id: {command.DeskId} - desk is unavaible for this moment");
+            }
+
+            if (desk.Reservations.LastOrDefault(r => r.IsFree(command.StartDate, command.EndDate) == false) != null)
             {
                 throw new CustomException(CustomErrorCode.DeskIsUnavailable, $"Unable to make reservation for desk with id: {command.DeskId} - desk is unavaible for this moment");
             }
@@ -131,6 +133,11 @@ namespace Hdbs.Services.Implementations
             if (desk == null)
             {
                 throw new CustomException(CustomErrorCode.DeskNotFound, $"Unable to find desk with id: {command.Id}");
+            }
+
+            if (desk.ForcedUnavailable)
+            {
+                throw new CustomException(CustomErrorCode.DeskIsUnavailable, $"Unable to update reservation with id: {command.Id} - desk is unavaible for this moment");
             }
 
             if (desk.Reservations.LastOrDefault(r => r.IsFree(reservation.StartDate, reservation.EndDate) == false) != null)
