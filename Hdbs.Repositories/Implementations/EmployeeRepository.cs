@@ -44,6 +44,34 @@ namespace Hdbs.Repositories.Implementations
             };
         }
 
+        public async Task<EmployeeDto> GetMeEmployeeAsync(GetMeEmployeeQuery query)
+        {
+            if(query.Id == null)
+            {
+                throw new CustomException(CustomErrorCode.EmployeeIdIsNull, "Unable to find employee with id: null");
+            }
+
+            var employee = await _dbContext.Employees
+                .Include(d => d.Reservations)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.Id == query.Id);
+
+            if (employee == null)
+            {
+                throw new CustomException(CustomErrorCode.EmployeeNotFound, $"Unable to find employee with id: {query.Id}");
+            }
+
+            return new EmployeeDto
+            {
+                Id = employee.Id,
+                IsDisabled = employee.IsDisabled,
+                Name = employee.UserName == null ? "" : employee.UserName,
+                Surname = employee.Surname,
+                Email = employee.Email == null ? "" : employee.Email,
+                Permissions = employee.Permissions.ToString()
+            };
+        }
+
         public async Task<PaginatedList<EmployeeListDto>> ListAsync(ListEmployeesQuery listAsyncQuery)
         {
             var query = _dbContext.Employees

@@ -188,11 +188,6 @@ namespace Hdbs.Services.Implementations
                 throw new CustomException(CustomErrorCode.EmployeeNotFound, $"Unable to find employee with id: {command.Id}");
             }
 
-            if(await _userManager.CheckPasswordAsync(employee, command.Password) == false) 
-            {
-                throw new CustomException(CustomErrorCode.WrongPassword, $"Unable to update employee with id: {command.Id} - wrong password");
-            }
-
             employee.UserName = command.Name == null ? employee.UserName : command.Name;
             employee.Surname = command.Surname == null ? employee.Surname : command.Surname;
             employee.Email = command.Email == null ? employee.Email : command.Email;
@@ -234,6 +229,51 @@ namespace Hdbs.Services.Implementations
             }
 
             employee.IsDisabled = command.IsDisabled;
+
+            var result = await _userManager.UpdateAsync(employee);
+            if (result.Succeeded == false)
+            {
+                throw new CustomException(CustomErrorCode.UnableToUpdateEmployee, $"Unable to update employee: {result.Errors}");
+            }
+        }
+
+        public async Task UpdateMyAsync(UpdateMyEmployeeCommand command)
+        {
+            if (command.EmployeeId == null)
+            {
+                throw new CustomException(CustomErrorCode.EmployeeIdIsNull, "Unable to find employee with id: null");
+            }
+
+            var employee = await _userManager.FindByIdAsync(command.EmployeeId);
+
+            if (employee == null)
+            {
+                throw new CustomException(CustomErrorCode.EmployeeNotFound, $"Unable to find employee with id: {command.EmployeeId}");
+            }
+
+            if (await _userManager.CheckPasswordAsync(employee, command.Password) == false)
+            {
+                throw new CustomException(CustomErrorCode.WrongPassword, $"Unable to update employee with id: {command.EmployeeId} - wrong password");
+            }
+
+            employee.UserName = command.Name == null ? employee.UserName : command.Name;
+            employee.Surname = command.Surname == null ? employee.Surname : command.Surname;
+            employee.Email = command.Email == null ? employee.Email : command.Email;
+
+            if ((command.NewPassword != null && command.RePassword == null) || (command.RePassword != null && command.NewPassword == null))
+            {
+                throw new CustomException(CustomErrorCode.UnableToUpdatePassword, $"Password or RePassword was missing or not match");
+            }
+
+            if (command.NewPassword != null)
+            {
+                if (command.NewPassword != command.RePassword)
+                {
+                    throw new CustomException(CustomErrorCode.UnableToUpdatePassword, $"Password or RePassword was missing or not match");
+                }
+
+                employee.PasswordHash = _userManager.PasswordHasher.HashPassword(employee, command.NewPassword);
+            }
 
             var result = await _userManager.UpdateAsync(employee);
             if (result.Succeeded == false)

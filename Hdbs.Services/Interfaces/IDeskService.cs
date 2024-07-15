@@ -1,11 +1,6 @@
 ﻿using Hdbs.Transfer.Desks.Commands;
 using Hdbs.Transfer.Desks.Data;
 using Hdbs.Transfer.Reservations.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hdbs.Services.Interfaces
 {

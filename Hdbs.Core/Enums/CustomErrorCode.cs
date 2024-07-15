@@ -33,5 +33,6 @@ namespace Hdbs.Core.Enums
         WrongGuidFormat = 422,
         UnableToCreateFirstAdmin = 423,
         WrongBoolFormat = 424,
+        NotMatchingIds = 425,
     }
 }

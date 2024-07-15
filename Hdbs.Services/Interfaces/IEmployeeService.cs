@@ -14,6 +14,7 @@ namespace Hdbs.Services.Interfaces
         Task SetPermissionsAsync(SetPermissionsForEmployeeCommand command);
         Task<EmployeeDto> CreateAsync(CreateEmployeeCommand command);
         Task UpdateAsync(UpdateEmployeeCommand command);
+        Task UpdateMyAsync(UpdateMyEmployeeCommand command);
         Task DeleteAsync(DeleteEmployeeCommand command);
         Task SetStatusAsync(SetStatusForEmployeeCommand command);
     }
