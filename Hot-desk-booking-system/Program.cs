@@ -7,7 +7,6 @@ using Hdbs.Repositories.Implementations;
 using Hdbs.Transfer.Locations.Data;
 using Hdbs.Services.Implementations;
 using Hot_desk_booking_system.Extensions;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -20,6 +19,7 @@ using Hdbs.Core.Enums;
 using Hot_desk_booking_system.DbInitializer;
 using Hot_desk_booking_system.PermissionHandler;
 using Microsoft.AspNetCore.Authorization;
+using OfficeOpenXml;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -110,11 +110,16 @@ builder.Services.AddAuthorization(options =>
 
     options.AddPolicy("SimpleViewORAdminView", policy =>
         policy.Requirements.Add(new PermissionRequirement(UserPermissions.SimpleView | UserPermissions.AdminView)));
+
+    options.AddPolicy("ImportEmployee", policy => policy.Requirements.Add(new PermissionRequirement(UserPermissions.ImportEmployee)));
 });
 
 // Configure Serilog
 builder.Host.UseSerilog((context, configuration) =>
     configuration.ReadFrom.Configuration(context.Configuration));
+
+// Add EPPlus
+ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
 // Add mediatr
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));

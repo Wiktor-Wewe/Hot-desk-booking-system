@@ -5,8 +5,10 @@ using Hdbs.Services.Interfaces;
 using Hdbs.Transfer.Employees.Commands;
 using Hdbs.Transfer.Employees.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using OfficeOpenXml;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -170,6 +172,8 @@ namespace Hdbs.Services.Implementations
             if (command.UpdateReservation) userPermissions |= UserPermissions.UpdateReservation;
             if (command.DeleteReservation) userPermissions |= UserPermissions.DeleteReservation;
 
+            if (command.ImportEmployee) userPermissions |= UserPermissions.ImportEmployee;
+
             employee.Permissions = userPermissions;
             
             var result = await _userManager.UpdateAsync(employee);
@@ -280,6 +284,87 @@ namespace Hdbs.Services.Implementations
             {
                 throw new CustomException(CustomErrorCode.UnableToUpdateEmployee, $"Unable to update employee: {result.Errors}");
             }
+        }
+
+        public async Task<ImportExcelEmployeeResponse> ImportExcelEmployeeAsync(ImportExcelEmployeeCommand command)
+        {
+            if (command.File == null || command.File.Length == 0)
+            {
+                throw new CustomException(CustomErrorCode.NoFileUploaded, "No file uploaded");
+            }
+
+            var fileExtension = Path.GetExtension(command.File.FileName);
+            if (fileExtension != ".xls" && fileExtension != ".xlsx")
+            {
+                throw new CustomException(CustomErrorCode.InvalidFileFormat, "The uploaded file is not a valid Excel file");
+            }
+
+            var response = new ImportExcelEmployeeResponse();
+
+            using (var stream = new MemoryStream())
+            {
+                await command.File.CopyToAsync(stream);
+                using (var package = new ExcelPackage(stream))
+                {
+                    var worksheet = package.Workbook.Worksheets[0];
+                    var rowCount = worksheet.Dimension.Rows;
+
+                    var expectedHeaders = new[] { "IsDisabled", "Name", "Surname", "Email", "Password", "Permissions" };
+                    for (int i = 0; i < expectedHeaders.Length; i++)
+                    {
+                        if (worksheet.Cells[1, i + 1].Text != expectedHeaders[i])
+                        {
+                            throw new CustomException(CustomErrorCode.InvalidTemplateFormat, "The uploaded Excel file does not have the correct template format");
+                        }
+                    }
+
+                    for (int row = 2; row <= rowCount; row++)
+                    {
+                        try
+                        {
+                            response.TotalNumber++;
+
+                            var isDisabled = bool.Parse(worksheet.Cells[row, 1].Text);
+                            var name = worksheet.Cells[row, 2].Text;
+                            var surname = worksheet.Cells[row, 3].Text;
+                            var email = worksheet.Cells[row, 4].Text;
+                            var password = worksheet.Cells[row, 5].Text;
+                            var permissions = Enum.Parse<UserPermissions>(worksheet.Cells[row, 6].Text);
+
+                            if(await _userManager.FindByEmailAsync(email) != null)
+                            {
+                                response.SkippedNumber++;
+                                continue;
+                            }
+
+                            var employee = new Employee
+                            {
+                                IsDisabled = isDisabled,
+                                UserName = name,
+                                Surname = surname,
+                                Email = email,
+                                Permissions = permissions
+                            };
+                        
+                            var userResponse = await _userManager.CreateAsync(employee, password);
+                            if(userResponse.Succeeded == false)
+                            {
+                                throw new CustomException(CustomErrorCode.UnableToCreateEmployee, $"Unable to create employee: {userResponse.Errors}");
+                            }
+
+                            response.SuccesedNumber++;
+                        }
+                        catch (Exception ex)
+                        {
+                            response.ErrorsNumber++;
+                            response.Errors.Add($"Row {row}: {ex.Message}");
+                        }
+
+                    }
+                }
+            }
+
+            return response;
         }
     }
 }

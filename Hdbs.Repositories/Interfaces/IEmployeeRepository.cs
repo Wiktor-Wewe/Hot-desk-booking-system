@@ -11,5 +11,6 @@ namespace Hdbs.Repositories.Interfaces
         Task<PaginatedList<ReservationListDto>> ListReservationsAsync(ListReservationsByEmployeeQuery listAsyncQuery);
         Task<EmployeeDto> GetMeEmployeeAsync(GetMeEmployeeQuery query);
         Task<EmployeeDto> GetAsync(GetEmployeeQuery query);
+        Task<MemoryStream> GetImportExcelAsync(GetImportExcelEmployeeQuery query);
     }
 }

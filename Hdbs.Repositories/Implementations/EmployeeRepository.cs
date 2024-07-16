@@ -8,6 +8,7 @@ using Hdbs.Transfer.Employees.Queries;
 using Hdbs.Transfer.Reservations.Data;
 using Hdbs.Transfer.Shared.Data;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
 using System.Linq.Dynamic.Core;
 
 namespace Hdbs.Repositories.Implementations
@@ -136,6 +137,34 @@ namespace Hdbs.Repositories.Implementations
                 listAsyncQuery.PageIndex,
                 listAsyncQuery.PageSize
             );
+        }
+
+        public async Task<MemoryStream> GetImportExcelAsync(GetImportExcelEmployeeQuery query)
+        {
+            using (var package = new ExcelPackage())
+            {
+                var worksheet = package.Workbook.Worksheets.Add("Users");
+
+                worksheet.Cells[1, 1].Value = "IsDisabled";
+                worksheet.Cells[1, 2].Value = "Name";
+                worksheet.Cells[1, 3].Value = "Surname";
+                worksheet.Cells[1, 4].Value = "Email";
+                worksheet.Cells[1, 5].Value = "Password";
+                worksheet.Cells[1, 6].Value = "Permissions";
+
+                using (var range = worksheet.Cells[1, 1, 1, 6])
+                {
+                    range.Style.Font.Bold = true;
+                    range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGray);
+                }
+
+                var stream = new MemoryStream();
+                package.SaveAs(stream);
+                stream.Position = 0;
+
+                return stream;
+            }
         }
     }
 }

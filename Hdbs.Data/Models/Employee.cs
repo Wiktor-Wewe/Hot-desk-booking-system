@@ -28,6 +28,8 @@ namespace Hdbs.Data.Models
         CreateReservation = 1 << 13,
         UpdateReservation = 1 << 14,
         DeleteReservation = 1 << 15,
+
+        ImportEmployee = 1 << 16,
     }
 
     public class Employee : IdentityUser

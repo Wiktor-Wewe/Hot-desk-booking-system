@@ -1,10 +1,5 @@
 ﻿using Hdbs.Transfer.Employees.Commands;
 using Hdbs.Transfer.Employees.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Hdbs.Services.Interfaces
 {
@@ -17,5 +12,6 @@ namespace Hdbs.Services.Interfaces
         Task UpdateMyAsync(UpdateMyEmployeeCommand command);
         Task DeleteAsync(DeleteEmployeeCommand command);
         Task SetStatusAsync(SetStatusForEmployeeCommand command);
+        Task<ImportExcelEmployeeResponse> ImportExcelEmployeeAsync(ImportExcelEmployeeCommand command);
     }
 }

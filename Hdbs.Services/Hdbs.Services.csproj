@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="EPPlus" Version="7.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Hdbs.Core\Hdbs.Core.csproj" />
     <ProjectReference Include="..\Hdbs.Data\Hdbs.Data.csproj" />
     <ProjectReference Include="..\Hdbs.Transfer\Hdbs.Transfer.csproj" />

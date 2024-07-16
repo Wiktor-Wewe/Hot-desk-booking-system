@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Hdbs.Core.Enums
+﻿namespace Hdbs.Core.Enums
 {
     public enum CustomErrorCode
     {
@@ -34,5 +28,8 @@ namespace Hdbs.Core.Enums
         UnableToCreateFirstAdmin = 423,
         WrongBoolFormat = 424,
         NotMatchingIds = 425,
+        NoFileUploaded = 426,
+        InvalidFileFormat = 427,
+        InvalidTemplateFormat = 428
     }
 }

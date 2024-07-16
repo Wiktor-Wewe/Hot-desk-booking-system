@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Hot_desk_booking_system.Controllers
@@ -116,6 +117,24 @@ namespace Hot_desk_booking_system.Controllers
             command.EmployeeId = id;
             await _mediator.Send(command);
             return Ok();
+        }
+
+        [Authorize(Policy = "ImportEmployee")]
+        [HttpGet("GetImportExcel")]
+        public async Task<IActionResult> GetImportExcel()
+        {
+            var query = new GetImportExcelEmployeeQuery();
+            var excelStream = await _mediator.Send(query);
+            string fileName = $"Hdbs_employee.xlsx";
+            return File(excelStream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+        }
+
+        [Authorize(Policy = "ImportEmployee")]
+        [HttpPost("ImportExcel")]
+        public async Task<IActionResult> ImportExcel([FromForm] ImportExcelEmployeeCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return Ok(result.ToResponseDto());
         }
     }
 }

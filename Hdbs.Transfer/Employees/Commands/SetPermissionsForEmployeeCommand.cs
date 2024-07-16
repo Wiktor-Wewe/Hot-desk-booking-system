@@ -33,5 +33,7 @@ namespace Hdbs.Transfer.Employees.Commands
         public bool CreateReservation { get; set; } = false;
         public bool UpdateReservation { get; set; } = false;
         public bool DeleteReservation { get; set; } = false;
+
+        public bool ImportEmployee { get; set; } = false;
     }
 }
